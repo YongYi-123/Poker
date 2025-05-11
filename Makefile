@@ -1,33 +1,36 @@
-.PHONY: all clean
-
-# Compiler settings
+# Compiler
 CXX = g++
-CXXFLAGS = -I ./headers -I ./include -std=c++17
-WARNINGS = -g -Wall -O2
+CXXFLAGS = -std=c++11 -Iinc -Iinclude -Wall -O2
 
 # Directories
 SRCDIR = src
 OBJDIR = obj
-INCDIR = headers
+BINDIR = bin
 
-# Sources and Objects
-SRCS = $(wildcard $(SRCDIR)/*.cpp)
-OBJS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SRCS))
+# Source and object files
+SRCS = $(wildcard $(SRCDIR)/*.cpp) main.cpp
+OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)
 
-# Target executable
-TARGET = poker
+# Executable name
+TARGET = $(BINDIR)/PokerGame
 
+# Default target
 all: $(TARGET)
 
-$(OBJDIR):
-	@mkdir -p $(OBJDIR)
+# Create bin and obj directories if they don't exist
+$(TARGET): $(OBJS)
+	@mkdir -p $(BINDIR)
+	$(CXX) $(CXXFLAGS) $^ -o $@
 
-$(TARGET): $(SRCDIR)/main.cpp $(OBJS) | $(OBJDIR)
-	$(CXX) $(WARNINGS) $(CXXFLAGS) $^ -o $@
+# Compile .cpp to .o
+$(OBJDIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+# Clean build artifacts
 clean:
-	rm -rf $(OBJDIR) $(TARGET)
+	rm -rf $(OBJDIR) $(BINDIR)
 
-# Compile rule
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR) Makefile
-	$(CXX) $(WARNINGS) $(CXXFLAGS) -c $< -o $@
+# Optional: run the game
+run: all
+	./$(TARGET)
