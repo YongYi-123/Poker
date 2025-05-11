@@ -17,5 +17,5 @@ public:
     char getFace() const;
     Suit getSuit() const;
 };
-
+ 
 #endif
