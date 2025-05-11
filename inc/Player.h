@@ -20,7 +20,7 @@ public:
 
     // Accessors
     std::string getUsername() const;
-    int getScore() const;
+    int getScore() const; 
     int getMoney() const;
     Hand& getHand();
     const std::vector<std::string>& getInventory() const;
