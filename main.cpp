@@ -9,6 +9,6 @@ int main() {
     GameManager game;
     game.mainMenu();  // Handles login, leaderboard, game loop, etc.
 
-    std::cout << "\nThanks for playing! Goodbye.\n";
+    std::cout << "\nThanks for playing! Goodbye. :D\n";
     return 0;
 }
