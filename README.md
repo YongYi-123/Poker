@@ -28,7 +28,6 @@ Inspired by the roguelike deck-builder *Balatro*, this game allows players to lo
 └── src/ # Source files (class implementations)
 ├── Card.cpp
 ├── Deck.cpp
-├── empty.cpp # (Unused or placeholder file)
 ├── GameManager.cpp
 ├── Hand.cpp
 ├── Leaderboard.cpp

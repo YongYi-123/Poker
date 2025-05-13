@@ -4,7 +4,7 @@
 #include <string>
 
 enum Suit { Spades, Hearts, Diamonds, Clubs };
-
+// define what is card and it's value, face, suit
 class Card {
 private:
     Suit suit;
