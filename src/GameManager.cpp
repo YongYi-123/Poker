@@ -2,8 +2,11 @@
 #include "Leaderboard.h"
 #include "Scorer.h"
 #include "Shop.h"
+#include "Display.h"
 #include <iostream>
 #include <limits>
+#include <sstream>
+
 
 GameManager::GameManager() {
     currentPlayer = nullptr;
@@ -47,7 +50,7 @@ void GameManager::mainMenu() {
                 playGame();
                 break;
             case 2:
-                Leaderboard::displayTopPlayers();
+                Leaderboard::displayTopPlayers(10, true);
                 break;
             case 3:
                 Shop::purchase(*currentPlayer);
@@ -67,7 +70,7 @@ void GameManager::mainMenu() {
 }
 
 void GameManager::playGame() {
-    currentPlayer->setScore(0);  // <--- add this
+    currentPlayer->setScore(0);
     deck.reset();
     deck.shuffle();
     currentPlayer->drawHand(deck.deal(8));
@@ -83,6 +86,9 @@ void GameManager::playGame() {
         }
 
         if (discardRoundsLeft > 0) {
+            std::cout << "\nPress Enter to continue to discard round...";
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
             discardRound();
 
             if (currentPlayer->isHandEmpty()) {
@@ -92,135 +98,185 @@ void GameManager::playGame() {
         }
     }
 
+    std::cout << "\nPress Enter to continue to award stage...";
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
     awardStage();
 }
 
+
 void GameManager::playRound() {
-    std::cout << "\n--- Play Round (" << playRoundsLeft << " left) ---\n";
+    std::vector<Card> selected;
+    std::vector<int> indices;
 
-    if (currentPlayer->isHandEmpty()) {
-        std::cout << "You have no cards left to play.\n";
-        return;
-    }
+    while (true) {
+        drawHandOnlyInterface(
+            *currentPlayer,
+            currentPlayer->getHand().getCards(),
+            playRoundsLeft,
+            discardRoundsLeft
+        );
 
-    // Let player use an item
-    if (!currentPlayer->getInventory().empty()) {
-        std::cout << "Use an item before playing? (y/n): ";
-        char useItem;
-        std::cin >> useItem;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "\n--- Play Round (" << playRoundsLeft << " left) ---\n";
+        std::cout << "\nYou can:\n";
+        std::cout << "- Type card indices to play (e.g. `0 1 3`)\n";
+        std::cout << "- Type `sort suit` or `sort value`\n";
+        std::cout << "- Type `show` to re-display your hand\n";
+        std::cout << "- Type `cancel` to skip this round\n";
+        std::cout << "Enter command or card indices: ";
 
-        if (useItem == 'y' || useItem == 'Y') {
-            currentPlayer->displayInventory();
-            std::cout << "Enter exact item name to use: ";
-            std::string item;
-            std::getline(std::cin, item);
+        std::string inputLine;
+        std::getline(std::cin, inputLine);
+        std::istringstream iss(inputLine);
 
-            if (item == "Score x2 Ticket") {
-                currentPlayer->setNextScoreMultiplier(2);
-                currentPlayer->useItem(item);
-                std::cout << "Score multiplier will be applied!\n";
-            } else if (item == "Copy Ticket") {
-                if (!currentPlayer->isHandEmpty()) {
-                    currentPlayer->copyRandomCardInHand();
-                    currentPlayer->useItem(item);
-                    std::cout << "A random card was copied!\n";
+        std::string firstWord;
+        iss >> firstWord;
+
+        if (firstWord == "sort") {
+            std::string mode;
+            iss >> mode;
+            if (mode == "suit") currentPlayer->getHand().sortBySuit();
+            else if (mode == "value") currentPlayer->getHand().sortByValue();
+            else std::cout << "Unknown sort mode.\n";
+        } else if (firstWord == "show") {
+            // Already shown at top of loop
+        } else if (firstWord == "cancel") {
+            std::cout << "Cancelled round. No cards played.\n";
+            return;
+        } else {
+            try {
+                int index = std::stoi(firstWord);
+                indices.push_back(index);
+                int next;
+                while (iss >> next) indices.push_back(next);
+
+                selected = currentPlayer->playCards(indices);
+
+                if (selected.empty()) {
+                    std::cout << "No valid cards selected.\n";
+                    indices.clear();
+                    continue;
                 }
-            } else if (item == "Spade Ticket" || item == "Heart Ticket" ||
-                       item == "Diamond Ticket" || item == "Club Ticket") {
-                Suit targetSuit;
-                if (item.find("Spade") != std::string::npos) targetSuit = Spades;
-                else if (item.find("Heart") != std::string::npos) targetSuit = Hearts;
-                else if (item.find("Diamond") != std::string::npos) targetSuit = Diamonds;
-                else targetSuit = Clubs;
-
-                currentPlayer->changeCardSuits(targetSuit, 3);
-                currentPlayer->useItem(item);
-                std::cout << "3 cards were changed to " << item << ".\n";
-            } else {
-                std::cout << "Invalid item.\n";
+                break;
+            } catch (...) {
+                std::cout << "Invalid input. Try again.\n";
+                indices.clear();
             }
         }
     }
 
-    // Sorting menu
-    while (true) {
-        std::cout << "\nSort your hand?\n";
-        std::cout << "1. Sort by Value\n";
-        std::cout << "2. Sort by Suit\n";
-        std::cout << "3. No sorting\n";
-        std::cout << "4. Proceed to card selection\n";
-        std::cout << "Enter your choice: ";
-        int sortChoice;
-        std::cin >> sortChoice;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-        if (sortChoice == 1)
-            currentPlayer->getHand().sortByValue();
-        else if (sortChoice == 2)
-            currentPlayer->getHand().sortBySuit();
-        else if (sortChoice == 4)
-            break;
-
-        currentPlayer->showHand();
-    }
-
-
-    std::vector<int> indices = currentPlayer->chooseCardsToPlay();
-    std::vector<Card> selected = currentPlayer->playCards(indices);
-
+    // Evaluate hand
     auto [handType, score] = Scorer::evaluate(selected);
     int multiplier = currentPlayer->getNextScoreMultiplier();
     if (multiplier > 1) {
-        std::cout << "Score x" << multiplier << " applied!\n";
         score *= multiplier;
-        currentPlayer->setNextScoreMultiplier(1); // reset
+        currentPlayer->setNextScoreMultiplier(1);
     }
-
-    std::cout << "Hand type: " << handType << "\n";
-    std::cout << "Scored " << score << " points!\n";
 
     currentPlayer->addScore(score);
     currentPlayer->updateStats(handType);
     playRoundsLeft--;
+
+    drawResultInterface(
+        *currentPlayer,
+        selected,
+        currentPlayer->getHand().getCards(),
+        indices,
+        playRoundsLeft,
+        discardRoundsLeft,
+        handType,
+        score
+    );
 }
 
+
+
 void GameManager::discardRound() {
-    std::cout << "\n--- Discard Round (" << discardRoundsLeft << " left) ---\n";
+    std::vector<int> indices;
 
-    int sortChoice;
-    std::cout << "Sort your hand?\n";
-    std::cout << "1. Sort by Value\n";
-    std::cout << "2. Sort by Suit\n";
-    std::cout << "3. No sorting\n";
-    std::cout << "Enter your choice: ";
-    std::cin >> sortChoice;
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    while (true) {
+        drawHandOnlyInterface(
+            *currentPlayer,
+            currentPlayer->getHand().getCards(),
+            playRoundsLeft,
+            discardRoundsLeft
+        );
 
-    if (sortChoice == 1)
-        currentPlayer->getHand().sortByValue();
-    else if (sortChoice == 2)
-        currentPlayer->getHand().sortBySuit();
+        std::cout << "\n--- Discard Round (" << discardRoundsLeft << " left) ---\n";
+        std::cout << "\nYou can:\n";
+        std::cout << "- Type card indices to discard (e.g. `0 1 3`)\n";
+        std::cout << "- Type `sort suit` or `sort value`\n";
+        std::cout << "- Type `show` to re-display your hand\n";
+        std::cout << "- Type `cancel` to skip this discard round\n";
+        std::cout << "Enter command or card indices: ";
 
-    currentPlayer->showHand();
+        std::string inputLine;
+        std::getline(std::cin, inputLine);
+        std::istringstream iss(inputLine);
 
-    std::vector<int> indices = currentPlayer->chooseCardsToDiscard();
-    currentPlayer->discardCards(indices);
+        std::string firstWord;
+        iss >> firstWord;
 
-    std::vector<Card> newCards = deck.deal(indices.size());
-    currentPlayer->addCardsToHand(newCards);
+        if (firstWord == "sort") {
+            std::string mode;
+            iss >> mode;
+            if (mode == "suit") currentPlayer->getHand().sortBySuit();
+            else if (mode == "value") currentPlayer->getHand().sortByValue();
+            else std::cout << "Unknown sort mode.\n";
+        } else if (firstWord == "show") {
+            // Already shown
+        } else if (firstWord == "cancel") {
+            std::cout << "Discard round skipped.\n";
+            return;
+        } else {
+            try {
+                int index = std::stoi(firstWord);
+                indices.push_back(index);
+                int next;
+                while (iss >> next) indices.push_back(next);
 
-    discardRoundsLeft--;
+                std::vector<Card> discarded = currentPlayer->getHand().getCards();  // backup
+                std::vector<Card> discardCopy;
+                for (int idx : indices)
+                    if (idx >= 0 && static_cast<size_t>(idx) < discarded.size())
+                        discardCopy.push_back(discarded[idx]);
+
+                currentPlayer->discardCards(indices);
+                std::vector<Card> newCards = deck.deal(indices.size());
+                currentPlayer->addCardsToHand(newCards);
+                discardRoundsLeft--;
+
+                drawResultInterface(
+                    *currentPlayer,
+                    discardCopy,
+                    currentPlayer->getHand().getCards(),
+                    indices,
+                    playRoundsLeft,
+                    discardRoundsLeft,
+                    "Discarded",
+                    0
+                );
+
+                return;
+            } catch (...) {
+                std::cout << "Invalid input. Please try again.\n";
+                indices.clear();
+            }
+        }
+    }
 }
 
 void GameManager::awardStage() {
     int finalScore = currentPlayer->getScore();
     int bestScore = Leaderboard::getSavedScore(currentPlayer->getUsername());
 
-    std::cout << "\n=== Final Score: " << finalScore << " ===\n";
-    std::cout << "Personal Best: " << std::max(finalScore, bestScore) << "\n";
+    drawAwardScreen(*currentPlayer, finalScore, bestScore);
 
-    currentPlayer->showStats();
-    currentPlayer->addMoney(currentPlayer->getScore() / 10);
-    Leaderboard::updatePlayerScore(currentPlayer->getUsername(), currentPlayer->getScore());
+    currentPlayer->addMoney(finalScore / 10);
+    Leaderboard::updatePlayerScore(currentPlayer->getUsername(), finalScore);
+
+    std::cout << "\nPress Enter to return to main menu...";
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
+
+

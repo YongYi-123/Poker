@@ -34,13 +34,47 @@ void Hand::sortByValue() {
 }
 
 void Hand::display() const {
-    std::cout << "Current hand:\n";
-    for (size_t i = 0; i < cards.size(); ++i) {
-        std::cout << "[" << i << "] "
-                  << cards[i].getFaceStr() << cards[i].getSuitEmoji()
-                  << " (" << cards[i].getSuitStr() << ")\n";
+    if (cards.empty()) {
+        std::cout << "(empty hand)\n";
+        return;
     }
+
+    int n = cards.size();
+
+    // Row 1: Indices
+    std::cout << "   ";
+    for (int i = 0; i < n; ++i) std::cout << "   " << i << "   ";
+    std::cout << "\n";
+
+    // Row 2: Top border
+    std::cout << "   ";
+    for (int i = 0; i < n; ++i) std::cout << "┌─────┐ ";
+    std::cout << "\n";
+
+    // Row 3: Ranks
+    std::cout << "   ";
+    for (const auto& card : cards) {
+        std::string face = card.getFaceStr(); // e.g., "A", "10", "J"
+        std::cout << "│ " << face;
+        if (face.length() == 1) std::cout << "  ";
+        else if (face.length() == 2) std::cout << " ";
+        std::cout << " │ ";
+    }
+    std::cout << "\n";
+
+    // Row 4: Suits
+    std::cout << "   ";
+    for (const auto& card : cards) {
+        std::cout << "│  " << card.getSuitEmoji() << "  │ ";  // Suit symbol
+    }
+    std::cout << "\n";
+
+    // Row 5: Bottom border
+    std::cout << "   ";
+    for (int i = 0; i < n; ++i) std::cout << "└─────┘ ";
+    std::cout << "\n";
 }
+
 
 void Hand::setCards(const std::vector<Card>& newCards) {
     cards = newCards;

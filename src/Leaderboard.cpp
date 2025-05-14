@@ -8,7 +8,7 @@
 using json = nlohmann::json;
 const std::string FILE_NAME = "players.json";
 
-void Leaderboard::displayTopPlayers(int topN) {
+void Leaderboard::displayTopPlayers(int topN, bool showHeader) {
     std::ifstream inFile(FILE_NAME);
     if (!inFile) {
         std::cerr << "Unable to open leaderboard file.\n";
@@ -36,22 +36,26 @@ void Leaderboard::displayTopPlayers(int topN) {
     for (auto& [username, info] : players.items()) {
         int score = 0;
         if (info.is_object()) {
-            score = info.value("score", 0);  // ✅ Safe access
+            score = info.value("score", 0);
         }
         scoreList.emplace_back(username, score);
     }
 
     std::sort(scoreList.begin(), scoreList.end(),
               [](const auto& a, const auto& b) {
-                  return a.second > b.second; // descending
+                  return a.second > b.second;
               });
 
-    std::cout << "====== Leaderboard ======\n";
+    if (showHeader) {
+        std::cout << "====== Leaderboard ======\n";
+    }
+
     for (int i = 0; i < std::min(topN, static_cast<int>(scoreList.size())); ++i) {
         std::cout << i + 1 << ". " << scoreList[i].first
                   << " - " << scoreList[i].second << " pts\n";
     }
 }
+
 
 void Leaderboard::updatePlayerScore(const std::string& username, int score) {
     std::ifstream inFile(FILE_NAME);
