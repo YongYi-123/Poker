@@ -2,7 +2,7 @@
 
 # Compiler settings
 CXX = g++
-CXXFLAGS = -I ./inc -std=c++17
+CXXFLAGS = -I ./inc -I ./include -std=c++17
 WARNINGS = -g -Wall -O3
 
 # Source files and object files

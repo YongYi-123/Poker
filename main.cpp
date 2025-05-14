@@ -1,13 +1,21 @@
 #include <iostream>
-#include "headers/GameManager.h"
+#include "GameManager.h"
+#ifdef _WIN32
+#include <windows.h>  // required for SetConsoleOutputCP
+#endif
 
 int main() {
-    std::cout << "==============================" << std::endl;
-    std::cout << "   Simplified Balatro Poker   " << std::endl;
-    std::cout << "==============================\n" << std::endl;
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);  // enable UTF-8 output in Windows terminal
+#endif
+
+    std::cout << "==============================\n";
+    std::cout << "   Simplified Balatro Poker   \n";
+    std::cout << "==============================\n\n";
 
     GameManager game;
-    game.mainMenu();  // Handles login, leaderboard, game loop, etc.
+    game.login();
+    game.mainMenu();
 
     std::cout << "\nThanks for playing! Goodbye. :D\n";
     return 0;

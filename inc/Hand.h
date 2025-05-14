@@ -11,10 +11,13 @@ public:
     Hand();
     void addCards(const std::vector<Card>& newCards);
     std::vector<Card> getCards() const;
-    void removeCards(const std::vector<int>& indices);
     void sortBySuit();
     void sortByValue();
     void display() const;
+    void setCards(const std::vector<Card>& newCards);
+    std::vector<Card> removeCards(const std::vector<int>& indices);  // Overload
+    size_t size() const;
+
 };
 
 #endif

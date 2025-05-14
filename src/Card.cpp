@@ -29,6 +29,10 @@ char Card::getFace() const {
     return face;
 }
 
+std::string Card::getFaceStr() const {
+    return std::string(1, face);
+}
+
 Suit Card::getSuit() const {
     return suit;
 }
@@ -40,5 +44,15 @@ std::string Card::getSuitStr() const {
         case Diamonds: return "Diamonds";
         case Clubs: return "Clubs";
         default: return "Unknown";
+    }
+}
+
+std::string Card::getSuitEmoji() const {
+    switch (suit) {
+        case Spades: return u8"♠";
+        case Hearts: return u8"♥";
+        case Diamonds: return u8"♦";
+        case Clubs: return u8"♣";
+        default: return "?";
     }
 }

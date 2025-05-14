@@ -1,0 +1,20 @@
+{
+    "me": {
+        "handStats": {
+            "High Card": 1,
+            "Pair": 1,
+            "Three of a Kind": 2
+        },
+        "inventory": [],
+        "money": 28,
+        "score": 240
+    },
+    "oo": {
+        "handStats": {
+            "High Card": 2
+        },
+        "inventory": [],
+        "money": 2,
+        "score": 21
+    }
+}

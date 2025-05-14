@@ -15,17 +15,6 @@ std::vector<Card> Hand::getCards() const {
     return cards;
 }
 
-// Remove cards by indices (assumed to be valid and sorted descending)
-void Hand::removeCards(const std::vector<int>& indices) {
-    std::vector<int> sortedIndices = indices;
-    std::sort(sortedIndices.rbegin(), sortedIndices.rend()); // remove from back to front
-    for (int index : sortedIndices) {
-        if (index >= 0 && index < static_cast<int>(cards.size())) {
-            cards.erase(cards.begin() + index);
-        }
-    }
-}
-
 // Sort cards by suit (Spades > Hearts > Diamonds > Clubs)
 void Hand::sortBySuit() {
     std::sort(cards.begin(), cards.end(), [](const Card& a, const Card& b) {
@@ -48,8 +37,28 @@ void Hand::display() const {
     std::cout << "Current hand:\n";
     for (size_t i = 0; i < cards.size(); ++i) {
         std::cout << "[" << i << "] "
-                  << "Value: " << cards[i].getValue()
-                  << ", Suit: " << cards[i].getSuit()
-                  << "\n";
+                  << cards[i].getFaceStr() << cards[i].getSuitEmoji()
+                  << " (" << cards[i].getSuitStr() << ")\n";
     }
+}
+
+void Hand::setCards(const std::vector<Card>& newCards) {
+    cards = newCards;
+}
+std::vector<Card> Hand::removeCards(const std::vector<int>& indices) {
+    std::vector<int> sorted = indices;
+    std::sort(sorted.rbegin(), sorted.rend());
+
+    std::vector<Card> removed;
+    for (int i : sorted) {
+        if (i >= 0 && i < static_cast<int>(cards.size())) {
+            removed.push_back(cards[i]);
+            cards.erase(cards.begin() + i);
+        }
+    }
+    std::reverse(removed.begin(), removed.end());  // keep original order
+    return removed;
+}
+size_t Hand::size() const {
+    return cards.size();
 }

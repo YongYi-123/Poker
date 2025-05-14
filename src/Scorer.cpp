@@ -75,8 +75,12 @@ std::pair<std::string, int> Scorer::evaluate(const std::vector<Card>& playedCard
     if (multiplier == 1) {
         // High Card: only highest card counts
         score = *std::max_element(values.begin(), values.end()) * multiplier;
-    } else {
-        for (const auto& [val, count] : valueCount) {
+    } 
+    else {
+        for (const auto& p : valueCount) {
+            int val = p.first;
+            int count = p.second;
+
             if ((multiplier == 2 && count == 2) ||
                 (multiplier == 3 && count == 2) ||
                 (multiplier == 4 && count == 3) ||
@@ -86,8 +90,9 @@ std::pair<std::string, int> Scorer::evaluate(const std::vector<Card>& playedCard
                 score += val * count;
             }
         }
-        score *= multiplier;
-    }
+    score *= multiplier;
+}
+
 
     return {handType, score};
 }
