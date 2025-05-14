@@ -2,17 +2,17 @@
 #define LEADERBOARD_H
 
 #include <string>
-#include <vector>
-#include <utility> // for std::pair
 
 class Leaderboard {
 public:
-    // Display top N players (sorted by score)
+    // Display top N players (default top 10)
     static void displayTopPlayers(int topN = 10);
 
     // Update the JSON leaderboard with the latest score
     static void updatePlayerScore(const std::string& username, int score);
+
+    static int getSavedScore(const std::string& username);
+
 };
 
 #endif
- 

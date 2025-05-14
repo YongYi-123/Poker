@@ -4,7 +4,7 @@
 #include <string>
 
 enum Suit { Spades, Hearts, Diamonds, Clubs };
-// define what is card and it's value, face, suit
+
 class Card {
 private:
     Suit suit;
@@ -13,9 +13,11 @@ private:
 public:
     Card(Suit s, char f);
     int getValue() const;
-    std::string getSuitStr() const;
     char getFace() const;
+    std::string getFaceStr() const;
     Suit getSuit() const;
+    std::string getSuitStr() const;
+    std::string getSuitEmoji() const;
 };
- 
+
 #endif
