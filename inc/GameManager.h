@@ -6,6 +6,7 @@
 #include "Scorer.h"
 #include "Leaderboard.h"
 #include "Shop.h"
+#include "Display.h"
 
 class GameManager {
 private:

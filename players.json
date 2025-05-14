@@ -1,13 +1,17 @@
 {
     "me": {
         "handStats": {
+            "Full House": 1,
             "High Card": 1,
-            "Pair": 1,
+            "Pair": 2,
             "Three of a Kind": 2
         },
-        "inventory": [],
-        "money": 28,
-        "score": 240
+        "inventory": [
+            "Club Ticket",
+            "Copy Ticket"
+        ],
+        "money": 33,
+        "score": 324
     },
     "oo": {
         "handStats": {
@@ -16,5 +20,8 @@
         "inventory": [],
         "money": 2,
         "score": 21
+    },
+    "yoyo": {
+        "score": 124
     }
 }
