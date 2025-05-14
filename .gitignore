@@ -1,0 +1,9 @@
+# Object files
+*.o
+
+# Executable file
+poker.exe
+
+# Object directory
+obj/
+

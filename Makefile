@@ -1,36 +1,37 @@
-# Compiler
-CXX = g++
-CXXFLAGS = -std=c++11 -Iinc -Iinclude -Wall -O2
+.PHONY: all clean
 
-# Directories
+# Compiler settings
+CXX = g++
+CXXFLAGS = -I ./inc -std=c++17
+WARNINGS = -g -Wall -O3
+
+# Source files and object files
 SRCDIR = src
 OBJDIR = obj
-BINDIR = bin
+INCDIR = inc
+SRCS = $(wildcard $(SRCDIR)/*.cpp)
+OBJS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SRCS))
 
-# Source and object files
-SRCS = $(wildcard $(SRCDIR)/*.cpp) main.cpp
-OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)
-
-# Executable name
-TARGET = $(BINDIR)/PokerGame
+# Name of the executable
+TARGET = poker.exe
 
 # Default target
 all: $(TARGET)
 
-# Create bin and obj directories if they don't exist
-$(TARGET): $(OBJS)
-	@mkdir -p $(BINDIR)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+# Make obj folder if it doesn't exist
+$(OBJDIR):
+	@if not exist "$(OBJDIR)" mkdir "$(OBJDIR)"
 
-# Compile .cpp to .o
-$(OBJDIR)/%.o: %.cpp
-	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+# Link everything into final executable
+$(TARGET): main.cpp $(OBJS) | $(OBJDIR)
+	$(CXX) $(WARNINGS) $(CXXFLAGS) $^ -o $@
 
-# Clean build artifacts
+# Compile each .cpp to .o (object)
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
+	@if not exist "$(dir $@)" mkdir "$(dir $@)"
+	$(CXX) $(WARNINGS) $(CXXFLAGS) -c $< -o $@
+
+# Clean all built files
 clean:
-	rm -rf $(OBJDIR) $(BINDIR)
-
-# Optional: run the game
-run: all
-	./$(TARGET)
+	@if exist "$(OBJDIR)" rmdir /s /q "$(OBJDIR)"
+	@if exist "$(TARGET)" del /f /q "$(TARGET)"
