@@ -44,10 +44,12 @@ void Hand::sortByValue() {
     });
 }
 
-// Display cards to console
 void Hand::display() const {
     std::cout << "Current hand:\n";
     for (size_t i = 0; i < cards.size(); ++i) {
-        std::cout << "[" << i << "] " << cards[i].toString() << "\n";
+        std::cout << "[" << i << "] "
+                  << "Value: " << cards[i].getValue()
+                  << ", Suit: " << cards[i].getSuit()
+                  << "\n";
     }
 }
