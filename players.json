@@ -1,4 +1,7 @@
 {
+    "1": {
+        "score": 220
+    },
     "me": {
         "handStats": {
             "Full House": 1,
@@ -12,6 +15,17 @@
         ],
         "money": 33,
         "score": 324
+    },
+    "o": {
+        "handStats": {
+            "Full House": 1,
+            "Two Pair": 1
+        },
+        "inventory": [
+            "Club Ticket"
+        ],
+        "money": 19,
+        "score": 248
     },
     "oo": {
         "handStats": {

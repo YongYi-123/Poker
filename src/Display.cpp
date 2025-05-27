@@ -14,46 +14,39 @@ void drawHandOnlyInterface(const Player& player,
                            int discardRoundsLeft) {
     std::cout << "\033[H\033[J";  // Clear and move cursor to top
 
-    // Header
     std::cout << std::right << std::setw(60) << "SCORE    : " << player.getScore() << "\n";
     std::cout << std::right << std::setw(60) << "HANDS    : " << playRoundsLeft << "\n";
     std::cout << std::right << std::setw(60) << "DISCARDS : " << discardRoundsLeft << "\n\n";
 
-    // Box top
-    std::cout << "╔═══════════════════════════════════════════════════════════════════════════╗\n";
+    std::cout << "╔════════════════════════════════════════════════════════════════════╗\n";
 
-    // Index line
+    // Index line (aligned)
     std::cout << "║   ";
     for (size_t i = 0; i < handCards.size(); ++i)
-        std::cout << "   " << i << "   ";
-    std::cout << std::string((8 - handCards.size()) * 7, ' ') << "║\n";
+        std::cout << "  " << std::setw(2) << i << "    ";
+    std::cout << std::string((8 - handCards.size()) * 8, ' ') << " ║\n";
 
-    // Top card border
     std::cout << "║   ";
     for (size_t i = 0; i < handCards.size(); ++i)
         std::cout << "┌─────┐ ";
-    std::cout << std::string((8 - handCards.size()) * 7, ' ') << "║\n";
+    std::cout << std::string((8 - handCards.size()) * 8, ' ') << " ║\n";
 
-    // Face line
     std::cout << "║   ";
     for (const Card& card : handCards)
         std::cout << "│ " << std::setw(2) << card.getFaceStr() << "  │ ";
-    std::cout << std::string((8 - handCards.size()) * 7, ' ') << "║\n";
+    std::cout << std::string((8 - handCards.size()) * 8, ' ') << " ║\n";
 
-    // Suit line
     std::cout << "║   ";
     for (const Card& card : handCards)
         std::cout << "│  " << card.getSuitEmoji() << "  │ ";
-    std::cout << std::string((8 - handCards.size()) * 7, ' ') << "║\n";
+    std::cout << std::string((8 - handCards.size()) * 8, ' ') << " ║\n";
 
-    // Bottom card border
     std::cout << "║   ";
     for (size_t i = 0; i < handCards.size(); ++i)
         std::cout << "└─────┘ ";
-    std::cout << std::string((8 - handCards.size()) * 7, ' ') << "║\n";
+    std::cout << std::string((8 - handCards.size()) * 8, ' ') << " ║\n";
 
-    // Box bottom
-    std::cout << "╚═══════════════════════════════════════════════════════════════════════════╝\n";
+    std::cout << "╚════════════════════════════════════════════════════════════════════╝\n";
 }
 
 
@@ -80,21 +73,16 @@ void drawResultInterface(const Player& player,
     }
 
     // Outer box top
-    std::cout << "╔═══════════════════════════════════════════════════════════════════════════╗\n";
+    std::cout << "╔════════════════════════════════════════════════════════════════════╗\n";
 
     // Played cards section
-    std::cout << "║ Played Cards:\n";
-    if (played.empty()) {
-        std::cout << "║   (none)\n";
-    } else {
-        Hand ph;
-        ph.setCards(played);
-        std::cout << "║ ";
-        ph.display();  // Your existing formatted card printer
-    }
+    std::cout << "║ Played Cards:                                                      ║\n";
+    Hand ph;
+    ph.setCards(played);
+    ph.display(false);  // Your existing formatted card printer
 
     // Remaining hand section
-    std::cout << "║ Hand:\n";
+    std::cout << "║ Hand:                                                              ║\n";
 
     // === PREPARE FULL SLOT VISUAL ===
 
@@ -124,14 +112,14 @@ void drawResultInterface(const Player& player,
     // Index row
     std::cout << "║   ";
     for (int i = 0; i < 8; ++i)
-        std::cout << "   " << i << "   ";
-    std::cout << "\n";
+        std::cout << "  " << std::setw(2) << i << "    ";
+    std::cout << " ║\n";
 
     // Top borders
     std::cout << "║   ";
     for (int i = 0; i < 8; ++i)
         std::cout << "┌─────┐ ";
-    std::cout << "\n";
+    std::cout << " ║\n";
 
     // Face values
     std::cout << "║   ";
@@ -141,7 +129,7 @@ void drawResultInterface(const Player& player,
         else
             std::cout << "│ " << std::setw(2) << faces[i] << "  │ ";
     }
-    std::cout << "\n";
+    std::cout << " ║\n";
 
     // Suits
     std::cout << "║   ";
@@ -151,16 +139,16 @@ void drawResultInterface(const Player& player,
         else
             std::cout << "│  " << suits[i] << "  │ ";
     }
-    std::cout << "\n";
+    std::cout << " ║\n";
 
     // Bottom borders
     std::cout << "║   ";
     for (int i = 0; i < 8; ++i)
         std::cout << "└─────┘ ";
-    std::cout << "\n";
+    std::cout << " ║\n";
 
     // Bottom of outer box
-    std::cout << "╚═══════════════════════════════════════════════════════════════════════════╝\n";
+    std::cout << "╚════════════════════════════════════════════════════════════════════╝\n";
 }
 
 void drawAwardScreen(const Player& player, int finalScore, int bestScore) {

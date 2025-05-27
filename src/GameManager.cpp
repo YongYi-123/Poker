@@ -149,7 +149,11 @@ void GameManager::playRound() {
                 indices.push_back(index);
                 int next;
                 while (iss >> next) indices.push_back(next);
-
+                if (indices.size() > 5) {
+                    std::cout << "You can only play up to 5 cards. Try again.\n";
+                    indices.clear();
+                    continue;
+                }
                 selected = currentPlayer->playCards(indices);
 
                 if (selected.empty()) {
@@ -234,7 +238,11 @@ void GameManager::discardRound() {
                 indices.push_back(index);
                 int next;
                 while (iss >> next) indices.push_back(next);
-
+                if (indices.size() > 5) {
+                    std::cout << "You can only discard up to 5 cards. Try again.\n";
+                    indices.clear();
+                    continue;
+                }
                 std::vector<Card> discarded = currentPlayer->getHand().getCards();  // backup
                 std::vector<Card> discardCopy;
                 for (int idx : indices)

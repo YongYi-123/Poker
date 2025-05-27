@@ -2,6 +2,7 @@
 #define HAND_H
 
 #include <vector>
+#include <iomanip>
 #include "Card.h"
 
 class Hand {
@@ -13,7 +14,7 @@ public:
     std::vector<Card> getCards() const;
     void sortBySuit();
     void sortByValue();
-    void display() const;
+    void display(bool showIndices = true) const;
     void setCards(const std::vector<Card>& newCards);
     std::vector<Card> removeCards(const std::vector<int>& indices);  // Overload
     size_t size() const;
