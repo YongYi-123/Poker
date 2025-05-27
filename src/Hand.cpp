@@ -33,46 +33,46 @@ void Hand::sortByValue() {
     });
 }
 
-void Hand::display() const {
-    if (cards.empty()) {
-        std::cout << "(empty hand)\n";
+void Hand::display(bool showIndices) const {
+    int n = cards.size();
+    int pad = 8 - n;
+
+    if (n == 0) {
+        std::cout << "║   (empty hand)\n";
         return;
     }
 
-    int n = cards.size();
-
-    // Row 1: Indices
-    std::cout << "   ";
-    for (int i = 0; i < n; ++i) std::cout << "   " << i << "   ";
-    std::cout << "\n";
-
-    // Row 2: Top border
-    std::cout << "   ";
-    for (int i = 0; i < n; ++i) std::cout << "┌─────┐ ";
-    std::cout << "\n";
-
-    // Row 3: Ranks
-    std::cout << "   ";
-    for (const auto& card : cards) {
-        std::string face = card.getFaceStr(); // e.g., "A", "10", "J"
-        std::cout << "│ " << face;
-        if (face.length() == 1) std::cout << "  ";
-        else if (face.length() == 2) std::cout << " ";
-        std::cout << " │ ";
+    // Index line (optional)
+    if (showIndices) {
+        std::cout << "║   ";
+        for (int i = 0; i < n; ++i)
+            std::cout << "  " << std::setw(2) << i << "    ";
+        std::cout << std::string(pad * 8, ' ') << " ║\n";
     }
-    std::cout << "\n";
 
-    // Row 4: Suits
-    std::cout << "   ";
-    for (const auto& card : cards) {
-        std::cout << "│  " << card.getSuitEmoji() << "  │ ";  // Suit symbol
-    }
-    std::cout << "\n";
+    // Top border
+    std::cout << "║   ";
+    for (int i = 0; i < n; ++i)
+        std::cout << "┌─────┐ ";
+    std::cout << std::string(pad * 8, ' ') << " ║\n";
 
-    // Row 5: Bottom border
-    std::cout << "   ";
-    for (int i = 0; i < n; ++i) std::cout << "└─────┘ ";
-    std::cout << "\n";
+    // Face values
+    std::cout << "║   ";
+    for (const auto& card : cards)
+        std::cout << "│ " << std::setw(2) << card.getFaceStr() << "  │ ";
+    std::cout << std::string(pad * 8, ' ') << " ║\n";
+
+    // Suits
+    std::cout << "║   ";
+    for (const auto& card : cards)
+        std::cout << "│  " << card.getSuitEmoji() << "  │ ";
+    std::cout << std::string(pad * 8, ' ') << " ║\n";
+
+    // Bottom border
+    std::cout << "║   ";
+    for (int i = 0; i < n; ++i)
+        std::cout << "└─────┘ ";
+    std::cout << std::string(pad * 8, ' ') << " ║\n";
 }
 
 

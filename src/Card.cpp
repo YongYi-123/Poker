@@ -1,6 +1,6 @@
 #include "Card.h"
 #include <stdexcept>
-
+using namespace std;
 // Constructor to initialize the card based on face and suit
 Card::Card(Suit s, char f) : suit(s), face(f) {
     switch (f) {
@@ -30,14 +30,15 @@ char Card::getFace() const {
 }
 
 std::string Card::getFaceStr() const {
-    return std::string(1, face);
+    if (face == 'T') return "10";
+    return std::string(" ") + face;         
 }
 
 Suit Card::getSuit() const {
     return suit;
 }
 
-std::string Card::getSuitStr() const {
+string Card::getSuitStr() const {
     switch (suit) {
         case Spades: return "Spades";
         case Hearts: return "Hearts";
@@ -47,7 +48,7 @@ std::string Card::getSuitStr() const {
     }
 }
 
-std::string Card::getSuitEmoji() const {
+string Card::getSuitEmoji() const {
     switch (suit) {
         case Spades: return u8"♠";
         case Hearts: return u8"♥";
