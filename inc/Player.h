@@ -40,7 +40,7 @@ public:
     void changeCardSuits(Suit suit, int count);
 
     // Persistence
-    void load();
+    bool load();
     void save();
     static bool playerExists(const std::string& name);
 
