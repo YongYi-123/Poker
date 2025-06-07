@@ -2,6 +2,27 @@
     "1": {
         "score": 220
     },
+    "2": {
+        "handStats": {},
+        "inventory": [],
+        "money": 0,
+        "score": 0
+    },
+    "e": {
+        "handStats": {},
+        "inventory": [],
+        "money": 0,
+        "score": 0
+    },
+    "ke": {
+        "score": 146
+    },
+    "l": {
+        "handStats": {},
+        "inventory": [],
+        "money": 0,
+        "score": 0
+    },
     "me": {
         "handStats": {
             "Full House": 1,
@@ -27,6 +48,12 @@
         "money": 19,
         "score": 248
     },
+    "ok": {
+        "handStats": {},
+        "inventory": [],
+        "money": 0,
+        "score": 0
+    },
     "oo": {
         "handStats": {
             "High Card": 2
@@ -34,6 +61,12 @@
         "inventory": [],
         "money": 2,
         "score": 21
+    },
+    "try": {
+        "handStats": {},
+        "inventory": [],
+        "money": 0,
+        "score": 0
     },
     "yoyo": {
         "score": 124

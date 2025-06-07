@@ -7,6 +7,7 @@
 #include <limits>
 #include <sstream>
 
+using namespace std;
 
 GameManager::GameManager() {
     currentPlayer = nullptr;
@@ -14,13 +15,27 @@ GameManager::GameManager() {
     discardRoundsLeft = 3;
 }
 
+bool GameManager::isLoggedIn() const {
+    return currentPlayer != nullptr;
+}
+
 void GameManager::login() {
-    std::string name;
-    std::cout << "Enter player name to login: ";
-    std::getline(std::cin, name);
+    string name;
+    cout << "Enter player name to login: ";
+    getline(cin, name);
+
     currentPlayer = new Player(name);
-    currentPlayer->load();
-    std::cout << "Welcome, " << currentPlayer->getUsername() << "!\n";
+    bool isReturning = currentPlayer->load();
+
+    if (isReturning) {
+        cout << "Welcome back, " << currentPlayer->getUsername() << "!\n";
+        cout << "Your current balance is: $" << currentPlayer->getMoney() << "\n";
+    } else {
+        cout << "Welcome, new player " << currentPlayer->getUsername() << "!\n";
+    }
+
+    cout << "\nPress Enter to continue...";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
 void GameManager::logout() {
@@ -28,22 +43,34 @@ void GameManager::logout() {
         currentPlayer->save();
         delete currentPlayer;
         currentPlayer = nullptr;
-        std::cout << "You have been logged out.\n";
+        cout << "You have been logged out.\n";
+        cout << "\nPress Enter to continue...";
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
 }
 
 void GameManager::mainMenu() {
     int choice;
     do {
-        std::cout << "\n=== Main Menu ===\n";
-        std::cout << "1. Play Game\n";
-        std::cout << "2. View Leaderboard\n";
-        std::cout << "3. Shop\n";
-        std::cout << "4. Logout\n";
-        std::cout << "5. View Inventory\n";
-        std::cout << "Enter your choice: ";
-        std::cin >> choice;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cout << "\033[H\033[J";  // Clear screen (works on most terminals)
+        cout << "==============================\n";
+        cout << "   Simplified Balatro Poker   \n";
+        cout << "==============================\n";
+        cout << "Player: " << currentPlayer->getUsername() << "\n";
+        cout << "\n=== Main Menu ===\n";
+        cout << "1. Play Game\n";
+        cout << "2. View Leaderboard\n";
+        cout << "3. Shop\n";
+        cout << "4. Logout\n";
+        cout << "5. View Inventory\n";
+        cout << "Enter your choice: ";
+        if (!(cin >> choice)) {
+            cin.clear();  // clear error flags
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // discard bad input
+            cout << "Invalid input. Please enter a number.\n";
+            continue;  // restart the loop
+        }
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');  // clean up input buffer
 
         switch (choice) {
             case 1:
@@ -51,20 +78,28 @@ void GameManager::mainMenu() {
                 break;
             case 2:
                 Leaderboard::displayTopPlayers(10, true);
+                cout << "\nPress Enter to return to menu...";
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 break;
             case 3:
                 Shop::purchase(*currentPlayer);
+                cout << "\nPress Enter to return to menu...";
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 break;
             case 4:
                 logout();
                 break;
-            case 5:
-                std::cout << "\n=== Inventory ===\n";
-                std::cout << "Balance: $" << currentPlayer->getMoney() << "\n";
+           case 5:
+                cout << "\n=== Inventory ===\n";
+                cout << "Balance: $" << currentPlayer->getMoney() << "\n";
                 currentPlayer->displayInventory();
+                cout << "\nPress Enter to return to menu...";
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 break;
             default:
-                std::cout << "Invalid option.\n";
+                cout << "Invalid option.\n";
+                cout << "\nPress Enter to return to menu...";
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
     } while (currentPlayer);
 }
@@ -81,33 +116,32 @@ void GameManager::playGame() {
         playRound();
 
         if (currentPlayer->isHandEmpty()) {
-            std::cout << "No cards remaining. Ending game early.\n";
+            cout << "No cards remaining. Ending game early.\n";
             break;
         }
 
         if (discardRoundsLeft > 0) {
-            std::cout << "\nPress Enter to continue to discard round...";
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            cout << "\nPress Enter to continue to discard round...";
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
             discardRound();
 
             if (currentPlayer->isHandEmpty()) {
-                std::cout << "No cards remaining after discard. Ending game early.\n";
+                cout << "No cards remaining after discard. Ending game early.\n";
                 break;
             }
         }
     }
 
-    std::cout << "\nPress Enter to continue to award stage...";
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cout << "\nPress Enter to continue to award stage...";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     awardStage();
 }
 
-
 void GameManager::playRound() {
-    std::vector<Card> selected;
-    std::vector<int> indices;
+    vector<Card> selected;
+    vector<int> indices;
 
     while (true) {
         drawHandOnlyInterface(
@@ -117,53 +151,53 @@ void GameManager::playRound() {
             discardRoundsLeft
         );
 
-        std::cout << "\n--- Play Round (" << playRoundsLeft << " left) ---\n";
-        std::cout << "\nYou can:\n";
-        std::cout << "- Type card indices to play (e.g. `0 1 3`)\n";
-        std::cout << "- Type `sort suit` or `sort value`\n";
-        std::cout << "- Type `show` to re-display your hand\n";
-        std::cout << "- Type `cancel` to skip this round\n";
-        std::cout << "Enter command or card indices: ";
+        cout << "\n--- Play Round (" << playRoundsLeft << " left) ---\n";
+        cout << "\nYou can:\n";
+        cout << "- Type card indices to play (e.g. `0 1 3`)\n";
+        cout << "- Type `sort suit` or `sort value`\n";
+        cout << "- Type `show` to re-display your hand\n";
+        cout << "- Type `cancel` to skip this round\n";
+        cout << "Enter command or card indices: ";
 
-        std::string inputLine;
-        std::getline(std::cin, inputLine);
-        std::istringstream iss(inputLine);
+        string inputLine;
+        getline(cin, inputLine);
+        istringstream iss(inputLine);
 
-        std::string firstWord;
+        string firstWord;
         iss >> firstWord;
 
         if (firstWord == "sort") {
-            std::string mode;
+            string mode;
             iss >> mode;
             if (mode == "suit") currentPlayer->getHand().sortBySuit();
             else if (mode == "value") currentPlayer->getHand().sortByValue();
-            else std::cout << "Unknown sort mode.\n";
+            else cout << "Unknown sort mode.\n";
         } else if (firstWord == "show") {
             // Already shown at top of loop
         } else if (firstWord == "cancel") {
-            std::cout << "Cancelled round. No cards played.\n";
+            cout << "Cancelled round. No cards played.\n";
             return;
         } else {
             try {
-                int index = std::stoi(firstWord);
+                int index = stoi(firstWord);
                 indices.push_back(index);
                 int next;
                 while (iss >> next) indices.push_back(next);
                 if (indices.size() > 5) {
-                    std::cout << "You can only play up to 5 cards. Try again.\n";
+                    cout << "You can only play up to 5 cards. Try again.\n";
                     indices.clear();
                     continue;
                 }
                 selected = currentPlayer->playCards(indices);
 
                 if (selected.empty()) {
-                    std::cout << "No valid cards selected.\n";
+                    cout << "No valid cards selected.\n";
                     indices.clear();
                     continue;
                 }
                 break;
             } catch (...) {
-                std::cout << "Invalid input. Try again.\n";
+                cout << "Invalid input. Try again.\n";
                 indices.clear();
             }
         }
@@ -193,10 +227,8 @@ void GameManager::playRound() {
     );
 }
 
-
-
 void GameManager::discardRound() {
-    std::vector<int> indices;
+    vector<int> indices;
 
     while (true) {
         drawHandOnlyInterface(
@@ -206,51 +238,51 @@ void GameManager::discardRound() {
             discardRoundsLeft
         );
 
-        std::cout << "\n--- Discard Round (" << discardRoundsLeft << " left) ---\n";
-        std::cout << "\nYou can:\n";
-        std::cout << "- Type card indices to discard (e.g. `0 1 3`)\n";
-        std::cout << "- Type `sort suit` or `sort value`\n";
-        std::cout << "- Type `show` to re-display your hand\n";
-        std::cout << "- Type `cancel` to skip this discard round\n";
-        std::cout << "Enter command or card indices: ";
+        cout << "\n--- Discard Round (" << discardRoundsLeft << " left) ---\n";
+        cout << "\nYou can:\n";
+        cout << "- Type card indices to discard (e.g. `0 1 3`)\n";
+        cout << "- Type `sort suit` or `sort value`\n";
+        cout << "- Type `show` to re-display your hand\n";
+        cout << "- Type `cancel` to skip this discard round\n";
+        cout << "Enter command or card indices: ";
 
-        std::string inputLine;
-        std::getline(std::cin, inputLine);
-        std::istringstream iss(inputLine);
+        string inputLine;
+        getline(cin, inputLine);
+        istringstream iss(inputLine);
 
-        std::string firstWord;
+        string firstWord;
         iss >> firstWord;
 
         if (firstWord == "sort") {
-            std::string mode;
+            string mode;
             iss >> mode;
             if (mode == "suit") currentPlayer->getHand().sortBySuit();
             else if (mode == "value") currentPlayer->getHand().sortByValue();
-            else std::cout << "Unknown sort mode.\n";
+            else cout << "Unknown sort mode.\n";
         } else if (firstWord == "show") {
             // Already shown
         } else if (firstWord == "cancel") {
-            std::cout << "Discard round skipped.\n";
+            cout << "Discard round skipped.\n";
             return;
         } else {
             try {
-                int index = std::stoi(firstWord);
+                int index = stoi(firstWord);
                 indices.push_back(index);
                 int next;
                 while (iss >> next) indices.push_back(next);
                 if (indices.size() > 5) {
-                    std::cout << "You can only discard up to 5 cards. Try again.\n";
+                    cout << "You can only discard up to 5 cards. Try again.\n";
                     indices.clear();
                     continue;
                 }
-                std::vector<Card> discarded = currentPlayer->getHand().getCards();  // backup
-                std::vector<Card> discardCopy;
+                vector<Card> discarded = currentPlayer->getHand().getCards();  // backup
+                vector<Card> discardCopy;
                 for (int idx : indices)
                     if (idx >= 0 && static_cast<size_t>(idx) < discarded.size())
                         discardCopy.push_back(discarded[idx]);
 
                 currentPlayer->discardCards(indices);
-                std::vector<Card> newCards = deck.deal(indices.size());
+                vector<Card> newCards = deck.deal(indices.size());
                 currentPlayer->addCardsToHand(newCards);
                 discardRoundsLeft--;
 
@@ -267,7 +299,7 @@ void GameManager::discardRound() {
 
                 return;
             } catch (...) {
-                std::cout << "Invalid input. Please try again.\n";
+                cout << "Invalid input. Please try again.\n";
                 indices.clear();
             }
         }
@@ -283,8 +315,6 @@ void GameManager::awardStage() {
     currentPlayer->addMoney(finalScore / 10);
     Leaderboard::updatePlayerScore(currentPlayer->getUsername(), finalScore);
 
-    std::cout << "\nPress Enter to return to main menu...";
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cout << "\nPress Enter to return to main menu...";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
-
-

@@ -23,6 +23,8 @@ public:
     void playRound();
     void discardRound();
     void awardStage();
+    bool load();
+    bool isLoggedIn() const;
 };
 
 #endif

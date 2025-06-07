@@ -94,21 +94,21 @@ void Player::changeCardSuits(Suit newSuit, int count) {
 }
 
 // Persistence
-void Player::load() {
+bool Player::load() {
     std::ifstream inFile(FILE_NAME);
-    if (!inFile.is_open()) return;
+    if (!inFile.is_open()) return false;
 
     std::stringstream buffer;
     buffer << inFile.rdbuf();
     std::string content = buffer.str();
     inFile.close();
 
-    if (content.empty()) return;
+    if (content.empty()) return false;
 
     json data = json::parse(content, nullptr, false);
     if (data.is_discarded()) {
         std::cerr << "Warning: Malformed players.json. Ignoring contents.\n";
-        return;
+        return false;
     }
 
     if (data.contains(username) && data[username].is_object()) {
@@ -117,7 +117,10 @@ void Player::load() {
         money = p.value("money", 0);
         inventory = p.value("inventory", std::vector<std::string>{});
         handStats = p.value("handStats", std::map<std::string, int>{});
+        return true;  // player data loaded successfully
     }
+
+    return false;  // player not found in file
 }
 
 void Player::save() {
