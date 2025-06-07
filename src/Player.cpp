@@ -46,6 +46,10 @@ void Player::setScore(int s) {
     score = s;
 }
 
+void Player::resetStats() {
+    handStats.clear();
+}
+
 void Player::setNextScoreMultiplier(int m) {
     nextScoreMultiplier = m;
 }

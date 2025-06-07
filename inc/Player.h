@@ -21,6 +21,7 @@ public:
 
     // Accessors
     std::string getUsername() const;
+    void resetStats();
     int getScore() const;
     int getMoney() const;
     Hand& getHand();

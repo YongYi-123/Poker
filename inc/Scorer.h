@@ -6,10 +6,16 @@
 #include <utility>  // for std::pair
 #include "Card.h"
 
-class Scorer {
-public:
-    // Evaluate the played hand and return a pair of (hand type, score)
-    static std::pair<std::string, int> evaluate(const std::vector<Card>& playedCards);
+struct ScoreResult {
+    std::string handType;
+    int score;
+    int multiplier;
+    std::vector<int> contributingValues;
 };
 
+class Scorer {
+public:
+    static ScoreResult evaluate(const std::vector<Card>& playedCards);
+    static int getMultiplier(const std::string& handType);
+};
 #endif

@@ -12,7 +12,7 @@
         "handStats": {},
         "inventory": [],
         "money": 0,
-        "score": 0
+        "score": 266
     },
     "ke": {
         "score": 146
@@ -23,6 +23,9 @@
         "money": 0,
         "score": 0
     },
+    "m": {
+        "score": 422
+    },
     "me": {
         "handStats": {
             "Full House": 1,
@@ -32,9 +35,24 @@
         },
         "inventory": [
             "Club Ticket",
+            "Copy Ticket",
+            "Score ×2 Ticket",
+            "Spade Ticket",
+            "Heart Ticket",
+            "Diamond Ticket",
+            "Club Ticket",
+            "Copy Ticket",
+            "Heart Ticket",
+            "Diamond Ticket",
+            "Club Ticket",
+            "Copy Ticket",
+            "Spade Ticket",
+            "Heart Ticket",
+            "Diamond Ticket",
+            "Club Ticket",
             "Copy Ticket"
         ],
-        "money": 33,
+        "money": 911,
         "score": 324
     },
     "o": {
