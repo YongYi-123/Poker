@@ -14,9 +14,9 @@ void drawHandOnlyInterface(const Player& player,
                            int discardRoundsLeft) {
     std::cout << "\033[H\033[J";  // Clear and move cursor to top
 
-    std::cout << std::right << std::setw(60) << "SCORE    : " << player.getScore() << "\n";
-    std::cout << std::right << std::setw(60) << "HANDS    : " << playRoundsLeft << "\n";
-    std::cout << std::right << std::setw(60) << "DISCARDS : " << discardRoundsLeft << "\n\n";
+    std::cout << std::right << std::setw(70) << "SCORE    : " << player.getScore() << "\n";
+    std::cout << std::right << std::setw(70) << "HANDS    : " << playRoundsLeft << "\n";
+    std::cout << std::right << std::setw(70) << "DISCARDS : " << discardRoundsLeft << "\n\n";
 
     std::cout << "╔════════════════════════════════════════════════════════════════════╗\n";
 
@@ -67,9 +67,9 @@ void drawResultInterface(
     std::cout << "\033[H\033[J";
 
     // Top-right stats
-    std::cout << std::right << std::setw(60) << "SCORE    : " << player.getScore() << "\n";
-    std::cout << std::right << std::setw(60) << "HANDS    : " << playRoundsLeft << "\n";
-    std::cout << std::right << std::setw(60) << "DISCARDS : " << discardRoundsLeft << "\n\n";
+    std::cout << std::right << std::setw(70) << "SCORE    : " << player.getScore() << "\n";
+    std::cout << std::right << std::setw(70) << "HANDS    : " << playRoundsLeft << "\n";
+    std::cout << std::right << std::setw(70) << "DISCARDS : " << discardRoundsLeft << "\n\n";
 
     // Show hand type result if any
     if (!handType.empty()) {

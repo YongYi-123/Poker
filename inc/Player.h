@@ -30,6 +30,7 @@ public:
     int getNextScoreMultiplier() const;
     void setNextScoreMultiplier(int m);
     void setScore(int s);
+    std::string getItemNameByIndex(int index) const;
 
     // Game logic
     void addScore(int amount);
@@ -39,6 +40,7 @@ public:
     void useItem(const std::string& item);
     void copyRandomCardInHand();
     void changeCardSuits(Suit suit, int count);
+    void useItemEffect(const std::string& itemName);
 
     // Persistence
     bool load();

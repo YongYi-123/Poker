@@ -38,30 +38,40 @@
     "me": {
         "handStats": {
             "High Card": 1,
-            "Pair": 1,
-            "Two Pair": 1
+            "Pair": 1
         },
         "inventory": [
-            "Club Ticket",
+            "Spade Ticket",
+            "Heart Ticket",
+            "Diamond Ticket",
             "Copy Ticket",
-            "Score ×2 Ticket",
+            "Score Double Ticket",
             "Spade Ticket",
             "Heart Ticket",
             "Diamond Ticket",
             "Club Ticket",
             "Copy Ticket",
+            "Score Double Ticket",
+            "Spade Ticket",
             "Heart Ticket",
             "Diamond Ticket",
             "Club Ticket",
             "Copy Ticket",
+            "Score Double Ticket",
+            "Spade Ticket",
+            "Heart Ticket",
+            "Diamond Ticket",
+            "Club Ticket",
+            "Copy Ticket",
+            "Score Double Ticket",
             "Spade Ticket",
             "Heart Ticket",
             "Diamond Ticket",
             "Club Ticket",
             "Copy Ticket"
         ],
-        "money": 973,
-        "score": 156
+        "money": 792,
+        "score": 142
     },
     "o": {
         "handStats": {
