@@ -35,3 +35,10 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
 clean:
 	@if exist "$(OBJDIR)" rmdir /s /q "$(OBJDIR)"
 	@if exist "$(TARGET)" del /f /q "$(TARGET)"
+# Build and run the executable
+run: $(TARGET)
+	@echo Welcome to Poker!
+	@timeout /t 1 > nul
+	@echo Running the game...
+	@timeout /t 1 > nul
+	@$(TARGET)
