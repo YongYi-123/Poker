@@ -160,7 +160,7 @@ void drawResultInterface(
     std::cout << "╚════════════════════════════════════════════════════════════════════╝\n";
 }
 
-void drawAwardScreen(const Player& player, int finalScore, int bestScore) {
+void drawAwardScreen(const Player& player, int finalScore, int bestScoreBeforeUpdate) {
     const int boxWidth = 72;
 
     auto center = [](const std::string& text, int width) {
@@ -174,16 +174,21 @@ void drawAwardScreen(const Player& player, int finalScore, int bestScore) {
     std::cout << "|" << center("** GAME OVER **", boxWidth) << "|\n";
     std::cout << "+" << std::string(boxWidth, '=') << "+\n";
 
-    // Final score section
     std::ostringstream scoreLine;
     scoreLine << "** " << finalScore << " **";
     std::cout << "|" << center("FINAL SCORE", boxWidth) << "|\n";
     std::cout << "|" << center(scoreLine.str(), boxWidth) << "|\n";
 
-    std::ostringstream bestLine;
-    bestLine << bestScore;
     std::cout << "|" << center("PERSONAL BEST", boxWidth) << "|\n";
-    std::cout << "|" << center(bestLine.str(), boxWidth) << "|\n";
+    if (finalScore > bestScoreBeforeUpdate) {
+        std::ostringstream newHigh;
+        newHigh << finalScore << " (NEW HIGH SCORE!)";
+        std::cout << "|" << center(newHigh.str(), boxWidth) << "|\n";
+    } else {
+        std::ostringstream bestLine;
+        bestLine << bestScoreBeforeUpdate;
+        std::cout << "|" << center(bestLine.str(), boxWidth) << "|\n";
+    }
 
     std::cout << "+" << std::string(boxWidth, '-') << "+\n";
 

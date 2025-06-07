@@ -7,9 +7,17 @@
 #include <limits>
 #include <sstream>
 #include <algorithm>
-#include <regex>
+#include <regex> 
 
 using namespace std;
+
+bool isAsciiPrintable(const std::string& s) {
+    for (unsigned char c : s) {
+       if (c < 32 || c > 126) return false;
+    }
+    return true;
+}
+
 
 GameManager::GameManager() {
     currentPlayer = nullptr;
@@ -23,16 +31,20 @@ bool GameManager::isLoggedIn() const {
 
 void GameManager::login() {
     string name;
-    std::regex validNameRegex("^[A-Za-z]+$");
-
     while (true) {
         cout << "Enter player name to login: ";
         getline(cin, name);
 
-        if (std::regex_match(name, validNameRegex)) {
+        bool allSpaces = std::all_of(name.begin(), name.end(), [](unsigned char c) {
+            return std::isspace(c);
+        });
+
+        if (!name.empty() && !allSpaces && isAsciiPrintable(name)) {
             break;
         } else {
-            cout << "Invalid input. Please use only English letters.\n";
+            cout << "Invalid input. Please use only English letters, numbers, and symbols.\n";
+            cout << "\nPress Enter to continue...";
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
     }
 
@@ -49,6 +61,7 @@ void GameManager::login() {
     cout << "\nPress Enter to continue...";
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
+
 
 void GameManager::logout() {
     if (currentPlayer) {
