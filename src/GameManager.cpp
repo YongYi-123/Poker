@@ -7,6 +7,7 @@
 #include <limits>
 #include <sstream>
 #include <algorithm>
+#include <regex>
 
 using namespace std;
 
@@ -22,8 +23,18 @@ bool GameManager::isLoggedIn() const {
 
 void GameManager::login() {
     string name;
-    cout << "Enter player name to login: ";
-    getline(cin, name);
+    std::regex validNameRegex("^[A-Za-z]+$");
+
+    while (true) {
+        cout << "Enter player name to login: ";
+        getline(cin, name);
+
+        if (std::regex_match(name, validNameRegex)) {
+            break;
+        } else {
+            cout << "Invalid input. Please use only English letters.\n";
+        }
+    }
 
     currentPlayer = new Player(name);
     bool isReturning = currentPlayer->load();
@@ -144,6 +155,7 @@ void GameManager::playRound() {
     vector<Card> selected;
     vector<int> indices;
 
+    // === Allow item usage ===
     while (true) {
         drawHandOnlyInterface(
             *currentPlayer,
@@ -156,6 +168,7 @@ void GameManager::playRound() {
         cout << "\nYou can:\n";
         cout << "- Type card indices to play (e.g. `0 1 3`)\n";
         cout << "- Type `sort suit` or `sort value`\n";
+        cout << "- Type `inventory` to view and use an item\n";
         cout << "Enter command or card indices: ";
 
         string inputLine;
@@ -172,6 +185,37 @@ void GameManager::playRound() {
             else if (mode == "value") currentPlayer->getHand().sortByValue();
             else cout << "Unknown sort mode.\n";
         } 
+        else if (firstWord == "inventory") {
+            currentPlayer->displayInventory();
+
+            const auto& inv = currentPlayer->getInventory();
+            if (inv.empty()) {
+                cout << "\nPress Enter to continue...";
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                continue;
+            }
+
+            cout << "\nEnter item index to use or press Enter to cancel: ";
+            string itemInput;
+            getline(cin, itemInput);
+
+            if (!itemInput.empty()) {
+                try {
+                    int index = stoi(itemInput);
+                    string itemName = currentPlayer->getItemNameByIndex(index);
+                    if (!itemName.empty()) {
+                        currentPlayer->useItemEffect(itemName);
+                    } else {
+                        cout << "Invalid index.\n";
+                    }
+                } catch (...) {
+                    cout << "Invalid input.\n";
+                }
+            }
+
+            cout << "\nPress Enter to continue...";
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
         else {
             try {
                 int index = stoi(firstWord);
@@ -203,8 +247,7 @@ void GameManager::playRound() {
             }
         }
     }
-
-    // New: use ScoreResult instead of pair
+    
     ScoreResult result = Scorer::evaluate(selected);
     int score = result.score;
     int baseMultiplier = result.multiplier;

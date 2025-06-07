@@ -10,7 +10,7 @@ struct Item {
 
 // Define available shop items
 const std::vector<Item> shopItems = {
-    {"Score ×2 Ticket", "Doubles the score of the next played hand", 10},
+    {"Score Double Ticket", "Doubles the score of the next played hand", 10},
     {"Spade Ticket", "Changes 3 random cards in hand to Spades", 5},
     {"Heart Ticket", "Changes 3 random cards in hand to Hearts", 5},
     {"Diamond Ticket", "Changes 3 random cards in hand to Diamonds", 5},

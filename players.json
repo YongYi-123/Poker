@@ -14,6 +14,15 @@
         "money": 0,
         "score": 266
     },
+    "efaef": {
+        "handStats": {
+            "High Card": 1,
+            "Pair": 1
+        },
+        "inventory": [],
+        "money": 18,
+        "score": 49
+    },
     "ke": {
         "score": 146
     },
@@ -28,32 +37,41 @@
     },
     "me": {
         "handStats": {
-            "Full House": 1,
             "High Card": 1,
-            "Pair": 2,
-            "Three of a Kind": 2
+            "Pair": 1
         },
         "inventory": [
-            "Club Ticket",
+            "Spade Ticket",
+            "Heart Ticket",
+            "Diamond Ticket",
             "Copy Ticket",
-            "Score ×2 Ticket",
+            "Score Double Ticket",
             "Spade Ticket",
             "Heart Ticket",
             "Diamond Ticket",
             "Club Ticket",
             "Copy Ticket",
+            "Score Double Ticket",
+            "Spade Ticket",
             "Heart Ticket",
             "Diamond Ticket",
             "Club Ticket",
             "Copy Ticket",
+            "Score Double Ticket",
+            "Spade Ticket",
+            "Heart Ticket",
+            "Diamond Ticket",
+            "Club Ticket",
+            "Copy Ticket",
+            "Score Double Ticket",
             "Spade Ticket",
             "Heart Ticket",
             "Diamond Ticket",
             "Club Ticket",
             "Copy Ticket"
         ],
-        "money": 911,
-        "score": 324
+        "money": 792,
+        "score": 142
     },
     "o": {
         "handStats": {

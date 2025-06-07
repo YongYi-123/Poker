@@ -69,12 +69,53 @@ void Player::updateStats(const std::string& handType) {
 void Player::addToInventory(const std::string& item) {
     inventory.push_back(item);
 }
+std::string Player::getItemNameByIndex(int index) const {
+    std::map<std::string, int> countMap;
+    for (const auto& item : inventory) {
+        countMap[item]++;
+    }
+
+    int i = 0;
+    for (const auto& pair : countMap) {
+        if (i == index) return pair.first;
+        i++;
+    }
+
+    return "";  // return empty string if index out of range
+}
 
 void Player::useItem(const std::string& item) {
     auto it = std::find(inventory.begin(), inventory.end(), item);
     if (it != inventory.end()) {
         inventory.erase(it);
     }
+}
+
+void Player::useItemEffect(const std::string& itemName) {
+    if (itemName == "Score Double Ticket") {
+        setNextScoreMultiplier(2);
+        std::cout << "Next score will be doubled!\n";
+    } else if (itemName == "Copy Ticket") {
+        copyRandomCardInHand();
+        std::cout << "A card has been copied!\n";
+    } else if (itemName == "Spade Ticket") {
+        changeCardSuits(Suit::Spades, 3);
+        std::cout << "3 cards changed to Spades!\n";
+    } else if (itemName == "Heart Ticket") {
+        changeCardSuits(Suit::Hearts, 3);
+        std::cout << "3 cards changed to Hearts!\n";
+    } else if (itemName == "Diamond Ticket") {
+        changeCardSuits(Suit::Diamonds, 3);
+        std::cout << "3 cards changed to Diamonds!\n";
+    } else if (itemName == "Club Ticket") {
+        changeCardSuits(Suit::Clubs, 3);
+        std::cout << "3 cards changed to Clubs!\n";
+    } else {
+        std::cout << "Unknown item: " << itemName << "\n";
+        return;
+    }
+
+    useItem(itemName);  // Remove item after use
 }
 
 void Player::copyRandomCardInHand() {
@@ -165,10 +206,19 @@ void Player::displayInventory() const {
     std::cout << "Inventory:\n";
     if (inventory.empty()) {
         std::cout << "  (empty)\n";
-    } else {
-        for (const auto& item : inventory) {
-            std::cout << "  - " << item << "\n";
-        }
+        return;
+    }
+
+    // Count items
+    std::map<std::string, int> countMap;
+    for (const auto& item : inventory) {
+        countMap[item]++;
+    }
+
+    // Store for index-based access
+    int idx = 0;
+    for (const auto& pair : countMap) {
+        std::cout << "[" << idx++ << "] " << pair.first << " × " << pair.second << "\n";
     }
 }
 

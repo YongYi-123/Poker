@@ -10,42 +10,52 @@ using namespace std;
 ScoreResult Scorer::evaluate(const vector<Card>& playedCards) {
     if (playedCards.empty()) return {"No Cards", 0, 1, {}};
 
-    map<int, int> valueCount;
+    map<char, int> faceCount;
     map<Suit, int> suitCount;
-    vector<int> values;
+    vector<char> faces;
+    vector<int> values; // from card.getValue()
     vector<int> used;
 
     for (const auto& card : playedCards) {
-        int val = card.getValue();
-        valueCount[val]++;
+        char f = card.getFace();
+        int v = card.getValue();
+        faceCount[f]++;
         suitCount[card.getSuit()]++;
-        values.push_back(val);
+        faces.push_back(f);
+        values.push_back(v);
     }
 
-    sort(values.begin(), values.end());
-    bool isFlush = (suitCount.size() == 1);
-    bool isStraight = false;
+    // Detect flush
+    bool isFlush = (playedCards.size() == 5) &&
+                   all_of(playedCards.begin(), playedCards.end(),
+                          [&](const Card& c) { return c.getSuit() == playedCards[0].getSuit(); });
 
-    // Check for straight (5 unique values in sequence)
-    if (values.size() >= 5) {
-        set<int> uniqueVals(values.begin(), values.end());
-        if (uniqueVals.size() == 5) {
-            auto it = uniqueVals.begin();
-            int first = *it;
-            ++it;
-            bool straight = true;
-            for (int i = 1; i < 5; ++i, ++it) {
-                if (*it != first + i) {
-                    straight = false;
-                    break;
-                }
+    // Detect straight
+    map<char, int> faceRank = {
+        {'2', 2}, {'3', 3}, {'4', 4}, {'5', 5},
+        {'6', 6}, {'7', 7}, {'8', 8}, {'9', 9},
+        {'T', 10}, {'J', 11}, {'Q', 12}, {'K', 13}, {'A', 14}
+    };
+
+    vector<int> ranks;
+    for (char f : faces)
+        ranks.push_back(faceRank[f]);
+
+    sort(ranks.begin(), ranks.end());
+    ranks.erase(unique(ranks.begin(), ranks.end()), ranks.end());
+
+    bool isStraight = false;
+    if (playedCards.size() == 5 && ranks.size() == 5) {
+        isStraight = true;
+        for (int i = 1; i < 5; ++i) {
+            if (ranks[i] != ranks[i - 1] + 1) {
+                isStraight = false;
+                break;
             }
-            isStraight = straight;
         }
     }
 
     string handType = "High Card";
-    int score = 0;
     int multiplier = 1;
 
     if (isFlush && isStraight) {
@@ -53,23 +63,19 @@ ScoreResult Scorer::evaluate(const vector<Card>& playedCards) {
         multiplier = 9;
         used = values;
     }
-    else if (any_of(valueCount.begin(), valueCount.end(), [](const auto& p) { return p.second == 4; })) {
+    else if (any_of(faceCount.begin(), faceCount.end(), [](const auto& p) { return p.second == 4; })) {
         handType = "Four of a Kind";
         multiplier = 8;
-        for (const auto& [val, cnt] : valueCount) {
-            if (cnt == 4) {
-                used.insert(used.end(), 4, val);
-            }
-        }
+        for (const auto& card : playedCards)
+            if (faceCount[card.getFace()] == 4)
+                used.push_back(card.getValue());
     }
-    else if (valueCount.size() == 2 &&
-             any_of(valueCount.begin(), valueCount.end(), [](const auto& p) { return p.second == 3; })) {
+    else if (faceCount.size() == 2 &&
+             any_of(faceCount.begin(), faceCount.end(), [](const auto& p) { return p.second == 3; })) {
         handType = "Full House";
         multiplier = 7;
-        for (const auto& [val, cnt] : valueCount) {
-            if (cnt == 3 || cnt == 2)
-                used.insert(used.end(), cnt, val);
-        }
+        for (const auto& card : playedCards)
+            used.push_back(card.getValue());
     }
     else if (isFlush) {
         handType = "Flush";
@@ -81,35 +87,30 @@ ScoreResult Scorer::evaluate(const vector<Card>& playedCards) {
         multiplier = 5;
         used = values;
     }
-    else if (any_of(valueCount.begin(), valueCount.end(), [](const auto& p) { return p.second == 3; })) {
+    else if (any_of(faceCount.begin(), faceCount.end(), [](const auto& p) { return p.second == 3; })) {
         handType = "Three of a Kind";
         multiplier = 4;
-        for (const auto& [val, cnt] : valueCount) {
-            if (cnt == 3)
-                used.insert(used.end(), 3, val);
-        }
+        for (const auto& card : playedCards)
+            if (faceCount[card.getFace()] == 3)
+                used.push_back(card.getValue());
     }
     else {
-        int pairCount = 0;
-        for (const auto& [val, cnt] : valueCount) {
-            if (cnt == 2) pairCount++;
-        }
+        int pairCount = count_if(faceCount.begin(), faceCount.end(),
+                                 [](const auto& p) { return p.second == 2; });
 
         if (pairCount == 2) {
             handType = "Two Pair";
             multiplier = 3;
-            for (const auto& [val, cnt] : valueCount) {
-                if (cnt == 2)
-                    used.insert(used.end(), 2, val);
-            }
+            for (const auto& card : playedCards)
+                if (faceCount[card.getFace()] == 2)
+                    used.push_back(card.getValue());
         }
         else if (pairCount == 1) {
             handType = "Pair";
             multiplier = 2;
-            for (const auto& [val, cnt] : valueCount) {
-                if (cnt == 2)
-                    used.insert(used.end(), 2, val);
-            }
+            for (const auto& card : playedCards)
+                if (faceCount[card.getFace()] == 2)
+                    used.push_back(card.getValue());
         }
         else {
             handType = "High Card";
@@ -118,12 +119,13 @@ ScoreResult Scorer::evaluate(const vector<Card>& playedCards) {
         }
     }
 
-    // compute score from used values
+    int score = 0;
     for (int v : used) score += v;
     score *= multiplier;
 
     return {handType, score, multiplier, used};
 }
+
 int Scorer::getMultiplier(const string& handType) {
     static const map<string, int> multipliers = {
         {"High Card", 1},

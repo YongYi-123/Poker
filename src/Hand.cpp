@@ -2,6 +2,17 @@
 #include <iostream>
 #include <algorithm>
 
+int getFaceRank(char f) {
+    switch (f) {
+        case 'A': return 14;
+        case 'K': return 13;
+        case 'Q': return 12;
+        case 'J': return 11;
+        case 'T': return 10;
+        default:  return f - '0';  // '2' to '9'
+    }
+}
+
 // Constructor
 Hand::Hand() {}
 
@@ -19,20 +30,22 @@ std::vector<Card> Hand::getCards() const {
 void Hand::sortBySuit() {
     std::sort(cards.begin(), cards.end(), [](const Card& a, const Card& b) {
         if (a.getSuit() == b.getSuit())
-            return a.getValue() > b.getValue(); // descending value
-        return a.getSuit() < b.getSuit(); // suit enum order
+            return getFaceRank(a.getFace()) > getFaceRank(b.getFace());  // sort within suit by rank
+        return a.getSuit() < b.getSuit();  // group by suit
     });
 }
 
 // Sort cards by value (descending), suit as tie-breaker
 void Hand::sortByValue() {
     std::sort(cards.begin(), cards.end(), [](const Card& a, const Card& b) {
-        if (a.getValue() == b.getValue())
-            return a.getSuit() < b.getSuit(); // tie-breaker by suit
-        return a.getValue() > b.getValue(); // descending value
+        int rankA = getFaceRank(a.getFace());
+        int rankB = getFaceRank(b.getFace());
+
+        if (rankA == rankB)
+            return a.getSuit() < b.getSuit();  // break tie by suit
+        return rankA > rankB;  // higher rank first
     });
 }
-
 void Hand::display(bool showIndices) const {
     int n = cards.size();
     int pad = 8 - n;
