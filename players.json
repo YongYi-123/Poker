@@ -1,110 +1,29 @@
 {
-    "1": {
-        "score": 220
-    },
-    "2": {
-        "handStats": {},
-        "inventory": [],
-        "money": 0,
-        "score": 0
-    },
-    "e": {
-        "handStats": {},
-        "inventory": [],
-        "money": 0,
-        "score": 266
-    },
-    "efaef": {
-        "handStats": {
-            "High Card": 1,
-            "Pair": 1
-        },
-        "inventory": [],
-        "money": 18,
-        "score": 49
-    },
-    "ke": {
-        "score": 146
-    },
-    "l": {
-        "handStats": {},
-        "inventory": [],
-        "money": 0,
-        "score": 0
-    },
-    "m": {
-        "score": 422
-    },
     "me": {
-        "handStats": {
-            "High Card": 1,
-            "Pair": 1
-        },
+        "handStats": {},
         "inventory": [
-            "Spade Ticket",
-            "Heart Ticket",
-            "Diamond Ticket",
-            "Copy Ticket",
+            "Score Double Ticket",
+            "Score Double Ticket",
+            "Score Double Ticket",
+            "Score Double Ticket",
+            "Score Double Ticket",
+            "Score Double Ticket",
+            "Score Double Ticket",
+            "Score Double Ticket",
+            "Score Double Ticket",
+            "Score Double Ticket",
+            "Score Double Ticket",
+            "Score Double Ticket",
             "Score Double Ticket",
             "Spade Ticket",
-            "Heart Ticket",
-            "Diamond Ticket",
-            "Club Ticket",
-            "Copy Ticket",
-            "Score Double Ticket",
             "Spade Ticket",
-            "Heart Ticket",
-            "Diamond Ticket",
-            "Club Ticket",
-            "Copy Ticket",
-            "Score Double Ticket",
-            "Spade Ticket",
-            "Heart Ticket",
-            "Diamond Ticket",
-            "Club Ticket",
-            "Copy Ticket",
-            "Score Double Ticket",
             "Spade Ticket",
             "Heart Ticket",
             "Diamond Ticket",
             "Club Ticket",
             "Copy Ticket"
         ],
-        "money": 792,
-        "score": 142
-    },
-    "o": {
-        "handStats": {
-            "Full House": 1,
-            "Two Pair": 1
-        },
-        "inventory": [
-            "Club Ticket"
-        ],
-        "money": 19,
-        "score": 248
-    },
-    "ok": {
-        "handStats": {},
-        "inventory": [],
-        "money": 0,
+        "money": 1832,
         "score": 0
-    },
-    "oo": {
-        "handStats": {
-            "High Card": 2
-        },
-        "inventory": [],
-        "money": 2,
-        "score": 21
-    },
-    "try": {
-        "handStats": {},
-        "inventory": [],
-        "money": 0,
-        "score": 0
-    },
-    "yoyo": {
-        "score": 124
     }
 }
