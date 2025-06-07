@@ -7,6 +7,7 @@
 #include <limits>
 #include <sstream>
 #include <algorithm>
+#include <regex>
 
 using namespace std;
 
@@ -22,8 +23,18 @@ bool GameManager::isLoggedIn() const {
 
 void GameManager::login() {
     string name;
-    cout << "Enter player name to login: ";
-    getline(cin, name);
+    std::regex validNameRegex("^[A-Za-z]+$");
+
+    while (true) {
+        cout << "Enter player name to login: ";
+        getline(cin, name);
+
+        if (std::regex_match(name, validNameRegex)) {
+            break;
+        } else {
+            cout << "Invalid input. Please use only English letters.\n";
+        }
+    }
 
     currentPlayer = new Player(name);
     bool isReturning = currentPlayer->load();
