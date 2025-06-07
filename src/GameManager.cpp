@@ -6,6 +6,7 @@
 #include <iostream>
 #include <limits>
 #include <sstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -106,6 +107,7 @@ void GameManager::mainMenu() {
 
 void GameManager::playGame() {
     currentPlayer->setScore(0);
+    currentPlayer->resetStats();
     deck.reset();
     deck.shuffle();
     currentPlayer->drawHand(deck.deal(8));
@@ -135,7 +137,6 @@ void GameManager::playGame() {
 
     cout << "\nPress Enter to continue to award stage...";
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
     awardStage();
 }
 
@@ -155,8 +156,6 @@ void GameManager::playRound() {
         cout << "\nYou can:\n";
         cout << "- Type card indices to play (e.g. `0 1 3`)\n";
         cout << "- Type `sort suit` or `sort value`\n";
-        cout << "- Type `show` to re-display your hand\n";
-        cout << "- Type `cancel` to skip this round\n";
         cout << "Enter command or card indices: ";
 
         string inputLine;
@@ -172,12 +171,8 @@ void GameManager::playRound() {
             if (mode == "suit") currentPlayer->getHand().sortBySuit();
             else if (mode == "value") currentPlayer->getHand().sortByValue();
             else cout << "Unknown sort mode.\n";
-        } else if (firstWord == "show") {
-            // Already shown at top of loop
-        } else if (firstWord == "cancel") {
-            cout << "Cancelled round. No cards played.\n";
-            return;
-        } else {
+        } 
+        else {
             try {
                 int index = stoi(firstWord);
                 indices.push_back(index);
@@ -186,6 +181,8 @@ void GameManager::playRound() {
                 if (indices.size() > 5) {
                     cout << "You can only play up to 5 cards. Try again.\n";
                     indices.clear();
+                    cout << "\nPress Enter to continue...";
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     continue;
                 }
                 selected = currentPlayer->playCards(indices);
@@ -193,26 +190,32 @@ void GameManager::playRound() {
                 if (selected.empty()) {
                     cout << "No valid cards selected.\n";
                     indices.clear();
+                    cout << "\nPress Enter to continue...";
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');    
                     continue;
                 }
                 break;
             } catch (...) {
                 cout << "Invalid input. Try again.\n";
+                cout << "\nPress Enter to continue...";
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 indices.clear();
             }
         }
     }
 
-    // Evaluate hand
-    auto [handType, score] = Scorer::evaluate(selected);
-    int multiplier = currentPlayer->getNextScoreMultiplier();
-    if (multiplier > 1) {
-        score *= multiplier;
-        currentPlayer->setNextScoreMultiplier(1);
+    // New: use ScoreResult instead of pair
+    ScoreResult result = Scorer::evaluate(selected);
+    int score = result.score;
+    int baseMultiplier = result.multiplier;
+    int itemMultiplier = currentPlayer->getNextScoreMultiplier();
+
+    if (itemMultiplier > 1) {
+        score *= itemMultiplier;
     }
 
     currentPlayer->addScore(score);
-    currentPlayer->updateStats(handType);
+    currentPlayer->updateStats(result.handType);
     playRoundsLeft--;
 
     drawResultInterface(
@@ -222,9 +225,14 @@ void GameManager::playRound() {
         indices,
         playRoundsLeft,
         discardRoundsLeft,
-        handType,
-        score
+        result.handType,
+        score,
+        baseMultiplier,
+        itemMultiplier,
+        result.contributingValues 
     );
+
+    currentPlayer->setNextScoreMultiplier(1);
 }
 
 void GameManager::discardRound() {
@@ -242,8 +250,6 @@ void GameManager::discardRound() {
         cout << "\nYou can:\n";
         cout << "- Type card indices to discard (e.g. `0 1 3`)\n";
         cout << "- Type `sort suit` or `sort value`\n";
-        cout << "- Type `show` to re-display your hand\n";
-        cout << "- Type `cancel` to skip this discard round\n";
         cout << "Enter command or card indices: ";
 
         string inputLine;
@@ -259,27 +265,40 @@ void GameManager::discardRound() {
             if (mode == "suit") currentPlayer->getHand().sortBySuit();
             else if (mode == "value") currentPlayer->getHand().sortByValue();
             else cout << "Unknown sort mode.\n";
-        } else if (firstWord == "show") {
-            // Already shown
-        } else if (firstWord == "cancel") {
-            cout << "Discard round skipped.\n";
-            return;
-        } else {
+        }
+        else {
             try {
                 int index = stoi(firstWord);
                 indices.push_back(index);
                 int next;
                 while (iss >> next) indices.push_back(next);
+
                 if (indices.size() > 5) {
                     cout << "You can only discard up to 5 cards. Try again.\n";
                     indices.clear();
+                    cout << "\nPress Enter to continue...";
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     continue;
                 }
-                vector<Card> discarded = currentPlayer->getHand().getCards();  // backup
+
+                size_t handSize = currentPlayer->getHand().getCards().size();
+                bool allValid = all_of(indices.begin(), indices.end(), [&](int idx) {
+                    return idx >= 0 && static_cast<size_t>(idx) < handSize;
+                });
+
+                if (!allValid) {
+                    cout << "One or more indices are out of range. Try again.\n";
+                    indices.clear();
+                    cout << "\nPress Enter to continue...";
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
+
+                // Proceed with discarding
+                vector<Card> discarded = currentPlayer->getHand().getCards();
                 vector<Card> discardCopy;
                 for (int idx : indices)
-                    if (idx >= 0 && static_cast<size_t>(idx) < discarded.size())
-                        discardCopy.push_back(discarded[idx]);
+                    discardCopy.push_back(discarded[idx]);
 
                 currentPlayer->discardCards(indices);
                 vector<Card> newCards = deck.deal(indices.size());
@@ -294,12 +313,14 @@ void GameManager::discardRound() {
                     playRoundsLeft,
                     discardRoundsLeft,
                     "Discarded",
-                    0
+                    0, 1, 1,
+                    {}
                 );
-
                 return;
             } catch (...) {
                 cout << "Invalid input. Please try again.\n";
+                cout << "\nPress Enter to continue...";
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 indices.clear();
             }
         }

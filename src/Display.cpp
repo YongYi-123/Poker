@@ -50,14 +50,19 @@ void drawHandOnlyInterface(const Player& player,
 }
 
 
-void drawResultInterface(const Player& player,
-                       const std::vector<Card>& played,
-                       const std::vector<Card>& remaining,
-                       const std::vector<int>& playedIndices,
-                       int playRoundsLeft,
-                       int discardRoundsLeft,
-                       const std::string& handType,
-                       int handScore) {
+void drawResultInterface(
+    const Player& player,
+    const std::vector<Card>& played,
+    const std::vector<Card>& remaining,
+    const std::vector<int>& playedIndices,
+    int playRoundsLeft,
+    int discardRoundsLeft,
+    const std::string& handType,
+    int handScore,
+    int baseMultiplier,
+    int itemMultiplier,
+    const std::vector<int>& contributingValues
+) {
     // ANSI escape codes: move to top-left and clear screen from cursor down
     std::cout << "\033[H\033[J";
 
@@ -69,7 +74,19 @@ void drawResultInterface(const Player& player,
     // Show hand type result if any
     if (!handType.empty()) {
         std::cout << "THIS HAND: " << handType << "\n";
-        std::cout << "SCORE    : " << handScore << "\n\n";
+
+        // Detailed score breakdown (only contributing cards)
+        std::ostringstream breakdown;
+        for (size_t i = 0; i < contributingValues.size(); ++i) {
+            breakdown << contributingValues[i];
+            if (i + 1 != contributingValues.size()) breakdown << " + ";
+        }
+
+        std::cout << "SCORE CALC: (" << breakdown.str() << ") * "
+                  << baseMultiplier << " (hand type)";
+        if (itemMultiplier > 1)
+            std::cout << " * " << itemMultiplier << " (item)";
+        std::cout << " = " << handScore << "\n\n";
     }
 
     // Outer box top
@@ -79,25 +96,19 @@ void drawResultInterface(const Player& player,
     std::cout << "║ Played Cards:                                                      ║\n";
     Hand ph;
     ph.setCards(played);
-    ph.display(false);  // Your existing formatted card printer
+    ph.display(false);
 
     // Remaining hand section
     std::cout << "║ Hand:                                                              ║\n";
-
-    // === PREPARE FULL SLOT VISUAL ===
 
     std::vector<std::string> faces(8, "EMPTY");
     std::vector<std::string> suits(8, " ");
     std::vector<bool> isPlayed(8, false);
 
-    // mark which indices were played
     for (int idx : playedIndices) {
-        if (idx >= 0 && idx < 8) {
-            isPlayed[idx] = true;
-        }
+        if (idx >= 0 && idx < 8) isPlayed[idx] = true;
     }
 
-    // fill the unplayed slots with remaining cards (in order)
     size_t remainingIdx = 0;
     for (int i = 0; i < 8; ++i) {
         if (!isPlayed[i] && remainingIdx < remaining.size()) {
@@ -106,8 +117,6 @@ void drawResultInterface(const Player& player,
             ++remainingIdx;
         }
     }
-
-    // === DRAW CARD GRID ===
 
     // Index row
     std::cout << "║   ";

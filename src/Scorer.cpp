@@ -1,14 +1,19 @@
 #include "Scorer.h"
 #include <map>
+#include <vector>
 #include <algorithm>
+#include <string>
 #include <set>
 
-std::pair<std::string, int> Scorer::evaluate(const std::vector<Card>& playedCards) {
-    if (playedCards.empty()) return {"No Cards", 0};
+using namespace std;
 
-    std::map<int, int> valueCount;
-    std::map<Suit, int> suitCount;
-    std::vector<int> values;
+ScoreResult Scorer::evaluate(const vector<Card>& playedCards) {
+    if (playedCards.empty()) return {"No Cards", 0, 1, {}};
+
+    map<int, int> valueCount;
+    map<Suit, int> suitCount;
+    vector<int> values;
+    vector<int> used;
 
     for (const auto& card : playedCards) {
         int val = card.getValue();
@@ -17,82 +22,124 @@ std::pair<std::string, int> Scorer::evaluate(const std::vector<Card>& playedCard
         values.push_back(val);
     }
 
-    std::sort(values.begin(), values.end());
+    sort(values.begin(), values.end());
     bool isFlush = (suitCount.size() == 1);
     bool isStraight = false;
 
-    // Check for straight (need at least 5 cards)
-    if (values.size() == 5) {
-        isStraight = true;
-        for (int i = 1; i < 5; ++i) {
-            if (values[i] != values[i - 1] + 1) {
-                isStraight = false;
-                break;
+    // Check for straight (5 unique values in sequence)
+    if (values.size() >= 5) {
+        set<int> uniqueVals(values.begin(), values.end());
+        if (uniqueVals.size() == 5) {
+            auto it = uniqueVals.begin();
+            int first = *it;
+            ++it;
+            bool straight = true;
+            for (int i = 1; i < 5; ++i, ++it) {
+                if (*it != first + i) {
+                    straight = false;
+                    break;
+                }
             }
+            isStraight = straight;
         }
     }
 
-    // Determine hand type and score
-    int multiplier = 1;
-    std::string handType = "High Card";
-
-    if (isStraight && isFlush) {
-        multiplier = 9;
-        handType = "Straight Flush";
-    } else if (valueCount.size() == 2) {
-        if (std::any_of(valueCount.begin(), valueCount.end(), [](auto& p) { return p.second == 4; })) {
-            multiplier = 8;
-            handType = "Four of a Kind";
-        } else {
-            multiplier = 7;
-            handType = "Full House";
-        }
-    } else if (isFlush) {
-        multiplier = 6;
-        handType = "Flush";
-    } else if (isStraight) {
-        multiplier = 5;
-        handType = "Straight";
-    } else if (std::any_of(valueCount.begin(), valueCount.end(), [](auto& p) { return p.second == 3; })) {
-        multiplier = 4;
-        handType = "Three of a Kind";
-    } else {
-        int pairCount = 0;
-        for (const auto& p : valueCount) {
-            if (p.second == 2) pairCount++;
-        }
-        if (pairCount == 2) {
-            multiplier = 3;
-            handType = "Two Pair";
-        } else if (pairCount == 1) {
-            multiplier = 2;
-            handType = "Pair";
-        }
-    }
-
+    string handType = "High Card";
     int score = 0;
+    int multiplier = 1;
 
-    if (multiplier == 1) {
-        // High Card: only highest card counts
-        score = *std::max_element(values.begin(), values.end()) * multiplier;
-    } 
-    else {
-        for (const auto& p : valueCount) {
-            int val = p.first;
-            int count = p.second;
-
-            if ((multiplier == 2 && count == 2) ||
-                (multiplier == 3 && count == 2) ||
-                (multiplier == 4 && count == 3) ||
-                (multiplier == 7 && (count == 3 || count == 2)) ||
-                (multiplier == 8 && count == 4) ||
-                (multiplier == 9 || multiplier == 6 || multiplier == 5)) {
-                score += val * count;
+    if (isFlush && isStraight) {
+        handType = "Straight Flush";
+        multiplier = 9;
+        used = values;
+    }
+    else if (any_of(valueCount.begin(), valueCount.end(), [](const auto& p) { return p.second == 4; })) {
+        handType = "Four of a Kind";
+        multiplier = 8;
+        for (const auto& [val, cnt] : valueCount) {
+            if (cnt == 4) {
+                used.insert(used.end(), 4, val);
             }
         }
+    }
+    else if (valueCount.size() == 2 &&
+             any_of(valueCount.begin(), valueCount.end(), [](const auto& p) { return p.second == 3; })) {
+        handType = "Full House";
+        multiplier = 7;
+        for (const auto& [val, cnt] : valueCount) {
+            if (cnt == 3 || cnt == 2)
+                used.insert(used.end(), cnt, val);
+        }
+    }
+    else if (isFlush) {
+        handType = "Flush";
+        multiplier = 6;
+        used = values;
+    }
+    else if (isStraight) {
+        handType = "Straight";
+        multiplier = 5;
+        used = values;
+    }
+    else if (any_of(valueCount.begin(), valueCount.end(), [](const auto& p) { return p.second == 3; })) {
+        handType = "Three of a Kind";
+        multiplier = 4;
+        for (const auto& [val, cnt] : valueCount) {
+            if (cnt == 3)
+                used.insert(used.end(), 3, val);
+        }
+    }
+    else {
+        int pairCount = 0;
+        for (const auto& [val, cnt] : valueCount) {
+            if (cnt == 2) pairCount++;
+        }
+
+        if (pairCount == 2) {
+            handType = "Two Pair";
+            multiplier = 3;
+            for (const auto& [val, cnt] : valueCount) {
+                if (cnt == 2)
+                    used.insert(used.end(), 2, val);
+            }
+        }
+        else if (pairCount == 1) {
+            handType = "Pair";
+            multiplier = 2;
+            for (const auto& [val, cnt] : valueCount) {
+                if (cnt == 2)
+                    used.insert(used.end(), 2, val);
+            }
+        }
+        else {
+            handType = "High Card";
+            multiplier = 1;
+            used.push_back(*max_element(values.begin(), values.end()));
+        }
+    }
+
+    // compute score from used values
+    for (int v : used) score += v;
     score *= multiplier;
+
+    return {handType, score, multiplier, used};
 }
+int Scorer::getMultiplier(const string& handType) {
+    static const map<string, int> multipliers = {
+        {"High Card", 1},
+        {"Pair", 2},
+        {"Two Pair", 3},
+        {"Three of a Kind", 4},
+        {"Straight", 5},
+        {"Flush", 6},
+        {"Full House", 7},
+        {"Four of a Kind", 8},
+        {"Straight Flush", 9}
+    };
 
-
-    return {handType, score};
+    auto it = multipliers.find(handType);
+    if (it != multipliers.end()) {
+        return it->second;
+    }
+    return 1; // Default multiplier
 }
