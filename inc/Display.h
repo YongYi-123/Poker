@@ -6,13 +6,11 @@
 #include <vector>
 #include <string>
 
-// For input phase — shows current hand only
 void drawHandOnlyInterface(const Player& player,
                            const std::vector<Card>& handCards,
                            int playRoundsLeft,
                            int discardRoundsLeft);
 
-// For result phase — shows played/discarded cards
 void drawResultInterface(
     const Player& player,
     const std::vector<Card>& played,
@@ -27,8 +25,7 @@ void drawResultInterface(
     const std::vector<int>& contributingValues
 );
 
-
-                         
 void drawAwardScreen(const Player& player, int finalScore, int bestScore);
+
 
 #endif

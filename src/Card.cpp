@@ -1,23 +1,22 @@
 #include "Card.h"
 #include <stdexcept>
 using namespace std;
-// Constructor to initialize the card based on face and suit
+
+// Constructor: initialize suit and face, compute value
 Card::Card(Suit s, char f) : suit(s), face(f) {
-    switch (f) {
-        case '2' ... '9':
-            value = f - '0';
-            break;
-        case 'T':
-        case 'J':
-        case 'Q':
-        case 'K':
-            value = 10;
-            break;
-        case 'A':
-            value = 11;
-            break;
-        default:
-            throw std::invalid_argument("Invalid face character");
+    if (f >= '2' && f <= '9') {
+        value = f - '0';
+    } else {
+        switch (f) {
+            case 'T': case 'J': case 'Q': case 'K':
+                value = 10;
+                break;
+            case 'A':
+                value = 11;
+                break;
+            default:
+                throw invalid_argument("Invalid face character: must be 2–9, T, J, Q, K, A");
+        }
     }
 }
 
@@ -31,7 +30,7 @@ char Card::getFace() const {
 
 std::string Card::getFaceStr() const {
     if (face == 'T') return "10";
-    return std::string(" ") + face;         
+    return string(" ") + face;  // prepend space for alignment
 }
 
 Suit Card::getSuit() const {
@@ -40,20 +39,20 @@ Suit Card::getSuit() const {
 
 string Card::getSuitStr() const {
     switch (suit) {
-        case Spades: return "Spades";
-        case Hearts: return "Hearts";
+        case Spades:   return "Spades";
+        case Hearts:   return "Hearts";
         case Diamonds: return "Diamonds";
-        case Clubs: return "Clubs";
-        default: return "Unknown";
+        case Clubs:    return "Clubs";
+        default:       return "Unknown";
     }
 }
 
 string Card::getSuitEmoji() const {
     switch (suit) {
-        case Spades: return u8"♠";
-        case Hearts: return u8"♥";
-        case Diamonds: return u8"♦";
-        case Clubs: return u8"♣";
-        default: return "?";
+        case Spades:   return "\033[1;37m♠\033[0m"; // white
+        case Hearts:   return "\033[31m♥\033[0m";   // red
+        case Diamonds: return "\033[31m♦\033[0m";   // red
+        case Clubs:    return "\033[1;37m♣\033[0m"; // white
+        default:       return "?";
     }
 }

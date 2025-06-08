@@ -8,7 +8,6 @@
 #include <sstream>
 #include <algorithm>
 #include <regex> 
-
 using namespace std;
 
 bool isAsciiPrintable(const std::string& s) {
@@ -30,6 +29,8 @@ bool GameManager::isLoggedIn() const {
 }
 
 void GameManager::login() {
+    cout << "\033[2J\033[H";
+    
     string name;
     while (true) {
         cout << "Enter player name to login: ";
@@ -42,20 +43,23 @@ void GameManager::login() {
         if (!name.empty() && !allSpaces && isAsciiPrintable(name)) {
             break;
         } else {
-            cout << "Invalid input. Please use only English letters, numbers, and symbols.\n";
+            cout << "\033[1;31mInvalid input. Please use only English letters, numbers, and symbols.\033[0m\n";
             cout << "\nPress Enter to continue...";
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "\033[2J\033[H";
         }
     }
 
     currentPlayer = new Player(name);
     bool isReturning = currentPlayer->load();
 
+    cout << "\033[2J\033[H";
+
     if (isReturning) {
-        cout << "Welcome back, " << currentPlayer->getUsername() << "!\n";
+        cout << "Welcome back, \033[1;34m" << currentPlayer->getUsername() << "\033[0m!\n";
         cout << "Your current balance is: $" << currentPlayer->getMoney() << "\n";
     } else {
-        cout << "Welcome, new player " << currentPlayer->getUsername() << "!\n";
+        cout << "Welcome, new player \033[1;34m" << currentPlayer->getUsername() << "\033[0m!\n";
     }
 
     cout << "\nPress Enter to continue...";

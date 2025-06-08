@@ -1,44 +1,38 @@
-.PHONY: all clean
+.PHONY: all clean run
 
-# Compiler settings
 CXX = g++
-CXXFLAGS = -I ./inc -I ./include -std=c++17
-WARNINGS = -g -Wall -O3
+CXXFLAGS = -I ./inc -I ./include -std=c++17 -g -Wall -O3
 
-# Source files and object files
 SRCDIR = src
 OBJDIR = obj
-INCDIR = inc
-SRCS = $(wildcard $(SRCDIR)/*.cpp)
-OBJS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SRCS))
+TARGET = poker
 
-# Name of the executable
-TARGET = poker.exe
+SRC_MAIN = main.cpp
+SRC_SRCS = $(wildcard $(SRCDIR)/*.cpp)
+SRCS = $(SRC_MAIN) $(SRC_SRCS)
 
-# Default target
+OBJS = $(patsubst %.cpp, $(OBJDIR)/%.o, $(notdir $(SRC_SRCS))) $(OBJDIR)/main.o
+
 all: $(TARGET)
 
-# Make obj folder if it doesn't exist
 $(OBJDIR):
-	@if not exist "$(OBJDIR)" mkdir "$(OBJDIR)"
+	@mkdir -p $(OBJDIR)
 
-# Link everything into final executable
-$(TARGET): main.cpp $(OBJS) | $(OBJDIR)
-	$(CXX) $(WARNINGS) $(CXXFLAGS) $^ -o $@
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
-# Compile each .cpp to .o (object)
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
-	@if not exist "$(dir $@)" mkdir "$(dir $@)"
-	$(CXX) $(WARNINGS) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Clean all built files
+$(OBJDIR)/main.o: main.cpp | $(OBJDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
 clean:
-	@if exist "$(OBJDIR)" rmdir /s /q "$(OBJDIR)"
-	@if exist "$(TARGET)" del /f /q "$(TARGET)"
-# Build and run the executable
+	@rm -rf $(OBJDIR) $(TARGET).exe
+
 run: $(TARGET)
-	@echo Welcome to Poker!
-	@timeout /t 1 > nul
-	@echo Running the game...
-	@timeout /t 1 > nul
-	@$(TARGET)
+	@echo "Welcome to Poker!"
+	@sleep 1
+	@echo "Running the game..."
+	@sleep 1
+	@./$(TARGET).exe

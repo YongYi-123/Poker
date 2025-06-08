@@ -1,113 +1,99 @@
 #include "Display.h"
-#include "Player.h"
-#include "Card.h"
 #include "Hand.h"
 #include "Leaderboard.h"
 #include <iostream>
 #include <iomanip>
-#include <vector>
-#include <string>
 #include <sstream>
+
+using namespace std;
+
 void drawHandOnlyInterface(const Player& player,
-                           const std::vector<Card>& handCards,
+                           const vector<Card>& handCards,
                            int playRoundsLeft,
                            int discardRoundsLeft) {
-    std::cout << "\033[H\033[J";  // Clear and move cursor to top
+    cout << "\033[H\033[J";  // Clear screen
 
-    std::cout << std::right << std::setw(70) << "SCORE    : " << player.getScore() << "\n";
-    std::cout << std::right << std::setw(70) << "HANDS    : " << playRoundsLeft << "\n";
-    std::cout << std::right << std::setw(70) << "DISCARDS : " << discardRoundsLeft << "\n\n";
+    cout << right << setw(70) << "SCORE    : " << player.getScore() << "\n";
+    cout << right << setw(70) << "HANDS    : " << playRoundsLeft << "\n";
+    cout << right << setw(70) << "DISCARDS : " << discardRoundsLeft << "\n\n";
 
-    std::cout << "╔════════════════════════════════════════════════════════════════════╗\n";
+    cout << "╔════════════════════════════════════════════════════════════════════╗\n";
 
-    // Index line (aligned)
-    std::cout << "║   ";
+    cout << "║   ";
     for (size_t i = 0; i < handCards.size(); ++i)
-        std::cout << "  " << std::setw(2) << i << "    ";
-    std::cout << std::string((8 - handCards.size()) * 8, ' ') << " ║\n";
+        cout << "  " << setw(2) << i << "    ";
+    cout << string((8 - handCards.size()) * 8, ' ') << " ║\n";
 
-    std::cout << "║   ";
+    cout << "║   ";
     for (size_t i = 0; i < handCards.size(); ++i)
-        std::cout << "┌─────┐ ";
-    std::cout << std::string((8 - handCards.size()) * 8, ' ') << " ║\n";
+        cout << "┌─────┐ ";
+    cout << string((8 - handCards.size()) * 8, ' ') << " ║\n";
 
-    std::cout << "║   ";
+    cout << "║   ";
     for (const Card& card : handCards)
-        std::cout << "│ " << std::setw(2) << card.getFaceStr() << "  │ ";
-    std::cout << std::string((8 - handCards.size()) * 8, ' ') << " ║\n";
+        cout << "│ " << setw(2) << card.getFaceStr() << "  │ ";
+    cout << string((8 - handCards.size()) * 8, ' ') << " ║\n";
 
-    std::cout << "║   ";
+    cout << "║   ";
     for (const Card& card : handCards)
-        std::cout << "│  " << card.getSuitEmoji() << "  │ ";
-    std::cout << std::string((8 - handCards.size()) * 8, ' ') << " ║\n";
+        cout << "│  " << card.getSuitEmoji() << "  │ ";
+    cout << string((8 - handCards.size()) * 8, ' ') << " ║\n";
 
-    std::cout << "║   ";
+    cout << "║   ";
     for (size_t i = 0; i < handCards.size(); ++i)
-        std::cout << "└─────┘ ";
-    std::cout << std::string((8 - handCards.size()) * 8, ' ') << " ║\n";
+        cout << "└─────┘ ";
+    cout << string((8 - handCards.size()) * 8, ' ') << " ║\n";
 
-    std::cout << "╚════════════════════════════════════════════════════════════════════╝\n";
+    cout << "╚════════════════════════════════════════════════════════════════════╝\n";
 }
 
+void drawResultInterface(const Player& player,
+                         const vector<Card>& played,
+                         const vector<Card>& remaining,
+                         const vector<int>& playedIndices,
+                         int playRoundsLeft,
+                         int discardRoundsLeft,
+                         const string& handType,
+                         int handScore,
+                         int baseMultiplier,
+                         int itemMultiplier,
+                         const vector<int>& contributingValues) {
+    cout << "\033[H\033[J";
 
-void drawResultInterface(
-    const Player& player,
-    const std::vector<Card>& played,
-    const std::vector<Card>& remaining,
-    const std::vector<int>& playedIndices,
-    int playRoundsLeft,
-    int discardRoundsLeft,
-    const std::string& handType,
-    int handScore,
-    int baseMultiplier,
-    int itemMultiplier,
-    const std::vector<int>& contributingValues
-) {
-    // ANSI escape codes: move to top-left and clear screen from cursor down
-    std::cout << "\033[H\033[J";
+    cout << right << setw(70) << "SCORE    : " << player.getScore() << "\n";
+    cout << right << setw(70) << "HANDS    : " << playRoundsLeft << "\n";
+    cout << right << setw(70) << "DISCARDS : " << discardRoundsLeft << "\n\n";
 
-    // Top-right stats
-    std::cout << std::right << std::setw(70) << "SCORE    : " << player.getScore() << "\n";
-    std::cout << std::right << std::setw(70) << "HANDS    : " << playRoundsLeft << "\n";
-    std::cout << std::right << std::setw(70) << "DISCARDS : " << discardRoundsLeft << "\n\n";
-
-    // Show hand type result if any
     if (!handType.empty()) {
-        std::cout << "THIS HAND: " << handType << "\n";
+        cout << "THIS HAND: " << handType << "\n";
 
-        // Detailed score breakdown (only contributing cards)
-        std::ostringstream breakdown;
+        ostringstream breakdown;
         for (size_t i = 0; i < contributingValues.size(); ++i) {
             breakdown << contributingValues[i];
             if (i + 1 != contributingValues.size()) breakdown << " + ";
         }
 
-        std::cout << "SCORE CALC: (" << breakdown.str() << ") * "
-                  << baseMultiplier << " (hand type)";
+        cout << "SCORE CALC: (" << breakdown.str() << ") * "
+             << baseMultiplier << " (hand type)";
         if (itemMultiplier > 1)
-            std::cout << " * " << itemMultiplier << " (item)";
-        std::cout << " = " << handScore << "\n\n";
+            cout << " * " << itemMultiplier << " (item)";
+        cout << " = " << handScore << "\n\n";
     }
 
-    // Outer box top
-    std::cout << "╔════════════════════════════════════════════════════════════════════╗\n";
-
-    // Played cards section
-    std::cout << "║ Played Cards:                                                      ║\n";
+    cout << "╔════════════════════════════════════════════════════════════════════╗\n";
+    cout << "║ Played Cards:                                                      ║\n";
     Hand ph;
     ph.setCards(played);
     ph.display(false);
 
-    // Remaining hand section
-    std::cout << "║ Hand:                                                              ║\n";
+    cout << "║ Hand:                                                              ║\n";
 
-    std::vector<std::string> faces(8, "EMPTY");
-    std::vector<std::string> suits(8, " ");
-    std::vector<bool> isPlayed(8, false);
+    vector<string> faces(8, "EMPTY");
+    vector<string> suits(8, " ");
+    vector<bool> isPlayed(8, false);
 
-    for (int idx : playedIndices) {
+    for (int idx : playedIndices)
         if (idx >= 0 && idx < 8) isPlayed[idx] = true;
-    }
 
     size_t remainingIdx = 0;
     for (int i = 0; i < 8; ++i) {
@@ -118,106 +104,94 @@ void drawResultInterface(
         }
     }
 
-    // Index row
-    std::cout << "║   ";
+    cout << "║   ";
     for (int i = 0; i < 8; ++i)
-        std::cout << "  " << std::setw(2) << i << "    ";
-    std::cout << " ║\n";
+        cout << "  " << setw(2) << i << "    ";
+    cout << " ║\n";
 
-    // Top borders
-    std::cout << "║   ";
+    cout << "║   ";
     for (int i = 0; i < 8; ++i)
-        std::cout << "┌─────┐ ";
-    std::cout << " ║\n";
+        cout << "┌─────┐ ";
+    cout << " ║\n";
 
-    // Face values
-    std::cout << "║   ";
-    for (int i = 0; i < 8; ++i) {
+    cout << "║   ";
+    for (int i = 0; i < 8; ++i)
         if (faces[i] == "EMPTY")
-            std::cout << "│" << std::setw(5) << "EMPTY" << "│ ";
+            cout << "│EMPTY│ ";
         else
-            std::cout << "│ " << std::setw(2) << faces[i] << "  │ ";
-    }
-    std::cout << " ║\n";
+            cout << "│ " << setw(2) << faces[i] << "  │ ";
+    cout << " ║\n";
 
-    // Suits
-    std::cout << "║   ";
-    for (int i = 0; i < 8; ++i) {
-        if (faces[i] == "EMPTY")
-            std::cout << "│     │ ";
-        else
-            std::cout << "│  " << suits[i] << "  │ ";
-    }
-    std::cout << " ║\n";
-
-    // Bottom borders
-    std::cout << "║   ";
+    cout << "║   ";
     for (int i = 0; i < 8; ++i)
-        std::cout << "└─────┘ ";
-    std::cout << " ║\n";
+        if (faces[i] == "EMPTY")
+            cout << "│     │ ";
+        else
+            cout << "│  " << suits[i] << "  │ ";
+    cout << " ║\n";
 
-    // Bottom of outer box
-    std::cout << "╚════════════════════════════════════════════════════════════════════╝\n";
+    cout << "║   ";
+    for (int i = 0; i < 8; ++i)
+        cout << "└─────┘ ";
+    cout << " ║\n";
+
+    cout << "╚════════════════════════════════════════════════════════════════════╝\n";
 }
 
 void drawAwardScreen(const Player& player, int finalScore, int bestScoreBeforeUpdate) {
     const int boxWidth = 72;
 
-    auto center = [](const std::string& text, int width) {
+    auto center = [](const string& text, int width) {
         int padding = (width - text.length()) / 2;
-        return std::string(padding, ' ') + text + std::string(width - padding - text.length(), ' ');
+        return string(padding, ' ') + text + string(width - padding - text.length(), ' ');
     };
 
-    std::cout << "\033[H\033[J";
+    cout << "\033[H\033[J";
+    cout << "+" << string(boxWidth, '=') << "+\n";
+    cout << "|" << center("** GAME OVER **", boxWidth) << "|\n";
+    cout << "+" << string(boxWidth, '=') << "+\n";
 
-    std::cout << "+" << std::string(boxWidth, '=') << "+\n";
-    std::cout << "|" << center("** GAME OVER **", boxWidth) << "|\n";
-    std::cout << "+" << std::string(boxWidth, '=') << "+\n";
-
-    std::ostringstream scoreLine;
+    ostringstream scoreLine;
     scoreLine << "** " << finalScore << " **";
-    std::cout << "|" << center("FINAL SCORE", boxWidth) << "|\n";
-    std::cout << "|" << center(scoreLine.str(), boxWidth) << "|\n";
+    cout << "|" << center("FINAL SCORE", boxWidth) << "|\n";
+    cout << "|" << center(scoreLine.str(), boxWidth) << "|\n";
 
-    std::cout << "|" << center("PERSONAL BEST", boxWidth) << "|\n";
+    cout << "|" << center("PERSONAL BEST", boxWidth) << "|\n";
     if (finalScore > bestScoreBeforeUpdate) {
-        std::ostringstream newHigh;
+        ostringstream newHigh;
         newHigh << finalScore << " (NEW HIGH SCORE!)";
-        std::cout << "|" << center(newHigh.str(), boxWidth) << "|\n";
+        cout << "|" << center(newHigh.str(), boxWidth) << "|\n";
     } else {
-        std::ostringstream bestLine;
+        ostringstream bestLine;
         bestLine << bestScoreBeforeUpdate;
-        std::cout << "|" << center(bestLine.str(), boxWidth) << "|\n";
+        cout << "|" << center(bestLine.str(), boxWidth) << "|\n";
     }
 
-    std::cout << "+" << std::string(boxWidth, '-') << "+\n";
+    cout << "+" << string(boxWidth, '-') << "+\n";
 
-    // Hand Stats section
-    std::cout << "|" << center("HAND STATS", boxWidth) << "|\n";
+    cout << "|" << center("HAND STATS", boxWidth) << "|\n";
     const auto& stats = player.getStats();
     for (const auto& [type, count] : stats) {
-        std::ostringstream line;
+        ostringstream line;
         line << type << " : " << count;
-        std::cout << "|" << center(line.str(), boxWidth) << "|\n";
+        cout << "|" << center(line.str(), boxWidth) << "|\n";
     }
 
-    std::cout << "+" << std::string(boxWidth, '-') << "+\n";
+    cout << "+" << string(boxWidth, '-') << "+\n";
+    cout << "|" << center("LEADERBOARD", boxWidth) << "|\n";
 
-    // Leaderboard section
-    std::cout << "|" << center("LEADERBOARD", boxWidth) << "|\n";
+    ostringstream buffer;
+    auto* old_buf = cout.rdbuf(buffer.rdbuf());
+    Leaderboard::displayTopPlayers(5, false);
+    cout.rdbuf(old_buf);
 
-    std::ostringstream buffer;
-    auto* old_buf = std::cout.rdbuf(buffer.rdbuf());
-    Leaderboard::displayTopPlayers(5, false);  // capture output
-    std::cout.rdbuf(old_buf);
-
-    std::istringstream in(buffer.str());
-    std::string line;
-    while (std::getline(in, line)) {
+    istringstream in(buffer.str());
+    string line;
+    while (getline(in, line)) {
         if (line.length() > boxWidth)
             line = line.substr(0, boxWidth - 3) + "...";
-        std::cout << "|" << center(line, boxWidth) << "|\n";
+        cout << "|" << center(line, boxWidth) << "|\n";
     }
 
-    std::cout << "+" << std::string(boxWidth, '=') << "+\n";
+    cout << "+" << string(boxWidth, '=') << "+\n";
 }
