@@ -4,7 +4,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 #include "Hand.h"
+#include "Item.h"
 
 class Player {
 private:
@@ -14,10 +16,10 @@ private:
     int nextScoreMultiplier = 1;
     Hand hand;
     std::map<std::string, int> handStats;
-    std::vector<std::string> inventory;
+    std::vector<std::unique_ptr<Item>> inventory;
 
     // Combo Mode
-    int lastMultiplier = 0;   
+    int lastMultiplier = 0;
     int comboCount = 0;
 
 public:
@@ -28,7 +30,7 @@ public:
     int getScore() const;
     int getMoney() const;
     Hand& getHand();
-    const std::vector<std::string>& getInventory() const;
+    const std::vector<std::unique_ptr<Item>>& getInventory() const;
     const std::map<std::string, int>& getStats() const;
     int getNextScoreMultiplier() const;
     void setNextScoreMultiplier(int m);
@@ -39,17 +41,15 @@ public:
     void addScore(int amount);
     void addMoney(int amount);
     void updateStats(const std::string& handType);
-    void addToInventory(const std::string& item);
-    void useItem(const std::string& item);
+    void addToInventory(std::unique_ptr<Item> item);
+    void useItemByIndex(int index);
     void copyRandomCardInHand();
     void changeCardSuits(Suit suit, int count);
-    void useItemEffect(const std::string& itemName);
 
     // Combo logic
     void resetCombo();
     void updateCombo(int currentMultiplier);
     int getComboMultiplier() const;
-
     void resetStats();
 
     // Persistence

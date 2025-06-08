@@ -233,12 +233,7 @@ void GameManager::playRound() {
             if (!itemInput.empty()) {
                 try {
                     int index = stoi(itemInput);
-                    string itemName = currentPlayer->getItemNameByIndex(index);
-                    if (!itemName.empty()) {
-                        currentPlayer->useItemEffect(itemName);
-                    } else {
-                        cout << "Invalid index.\n";
-                    }
+                    currentPlayer->useItemByIndex(index);
                 } catch (...) {
                     cout << "Invalid input.\n";
                 }
@@ -314,7 +309,7 @@ void GameManager::playRound() {
         result.handType,
         finalScore,
         baseMultiplier,
-        itemMultiplier * comboMultiplier,  // 顯示用
+        itemMultiplier * comboMultiplier,
         result.contributingValues
     );
 
