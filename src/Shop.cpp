@@ -71,7 +71,7 @@ void Shop::showItems() {
 
         cout << boxTop << "\n";
 
-        // ✅ 對齊不破框（使用 setw 和 left）
+        // 對齊不破框（使用 setw 和 left）
         cout << "│ " << left << setw(boxWidth - 3) << nameLine << "                   │" << endl;
 
         const int maxLineLen = boxWidth - 4;
@@ -151,6 +151,7 @@ void Shop::purchase(Player& player) {
 
     if (totalCost > player.getMoney()) {
         std::cout << "Not enough money. Transaction canceled.\n";
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         return;
     }
 
@@ -168,4 +169,5 @@ void Shop::purchase(Player& player) {
     } else {
         std::cout << "Transaction canceled.\n";
     }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
