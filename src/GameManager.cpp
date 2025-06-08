@@ -9,6 +9,8 @@
 #include <sstream>
 #include <algorithm>
 #include <regex> 
+#include <thread>
+#include <chrono>
 using namespace std;
 
 bool isAsciiPrintable(const std::string& s) {
@@ -414,10 +416,41 @@ void GameManager::awardStage() {
     int finalScore = currentPlayer->getScore();
     int bestScore = Leaderboard::getSavedScore(currentPlayer->getUsername());
 
-    drawAwardScreen(*currentPlayer, finalScore, bestScore);
+    if (finalScore > 150) {
+        cout << "\033[2J\033[H";
+        vector<string> crown = {
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+            "⠀⣠⣄⠀⠀⠀⠀⠀⠀⣏⢉⡆⠀⠀⠀⠀⢰⡋⢹⡄⠀⠀⠀⠀⠀⣠⣤⡀",
+            "⠸⣄⣼⡀⠀⠀⠀⠀⠀⢈⡿⡄⠀⠀⠀⠀⢠⠿⡁⠀⠀⠀⠀⠀⠀⣧⣠⠇",
+            "⠀⠀⢸⡉⠢⣄⠀⠀⠀⡼⠀⠘⢦⠀⠀⡰⠃⠀⢧⠀⠀⠀⣠⠔⠋⡇⠀⠀",
+            "⠀⠀⠀⣇⠀⠈⠑⠒⠒⠁⠀⠀⠀⠑⠊⠁⠀⠀⠈⠒⠒⠊⠁⠀⢸⠀⠀⠀",
+            "    ⢹⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀           ⡏⠀⠀⠀",
+            "⠀⠀⠀⠀⣓⠤⠤⣄⣀⣀⣀⣀⣀⠀⢀⣀⣀⣀⣀⣀⡤⢤⣾⠅⠀⠀⠀",
+            "⠀⠀⠀⠀⣏⢭⡙⢒⡒⠒⠒⠛⠛⢻⡛⠛⠛⠒⢒⡒⠋⡭⣽⡇⠀⠀⠀",
+            "⠀⠀⠀⠀⣏⡚⠁⠧⠜⠰⣍⠇⠰⣁⣈⠆⠸⣭⠇⠳⠼⢓⣹⠇⠀⠀⠀",
+            "⠀⠀⠀⠀⠓⠮⠭⠭⣟⣒⣒⣒⣒⣚⣓⣒⣒⣒⣒⣚⠭⠭⠵⠚⠀⠀⠀⠀"
+        };
 
+        for (size_t i = 1; i <= crown.size(); ++i) {
+            cout << "\033[2J\033[H";
+            for (size_t j = 0; j < i; ++j)
+                cout << crown[j] << '\n';
+            this_thread::sleep_for(chrono::milliseconds(150));
+        }
+
+        for (int i = 0; i < 2; ++i) {
+            cout << "\033[2J\033[H";
+            this_thread::sleep_for(chrono::milliseconds(150));
+            for (const auto& line : crown)
+                cout << line << '\n';
+            this_thread::sleep_for(chrono::milliseconds(150));
+        }
+
+        this_thread::sleep_for(chrono::seconds(2));
+    }
+
+    drawAwardScreen(*currentPlayer, finalScore, bestScore);
     currentPlayer->addMoney(finalScore / 10);
-    
     cout << "\nPress Enter to return to main menu...";
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
