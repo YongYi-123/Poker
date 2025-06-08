@@ -151,6 +151,7 @@ void Shop::purchase(Player& player) {
 
     if (totalCost > player.getMoney()) {
         std::cout << "Not enough money. Transaction canceled.\n";
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         return;
     }
 
@@ -168,4 +169,5 @@ void Shop::purchase(Player& player) {
     } else {
         std::cout << "Transaction canceled.\n";
     }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
