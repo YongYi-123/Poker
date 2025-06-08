@@ -3,14 +3,17 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <fstream>
 #include <algorithm>
 #include "Display.h"
 #include "Hand.h"
 #include "Player.h"
 #include "Card.h"
 #include "Leaderboard.h"
+#include "json.hpp"
 
 using namespace std;
+using json = nlohmann::json;
 
 void printGameHeader() {
     cout << "\033[1;37m♠\033[0m    "
@@ -181,6 +184,39 @@ void drawResultInterface(const Player& player,
 
 void drawAwardScreen(const Player& player, int finalScore, int bestScoreBeforeUpdate) {
     const int boxWidth = 72;
+    Leaderboard::updatePlayerScore(player.getUsername(), finalScore);
+
+    std::vector<std::pair<std::string, int>> scoreList;
+    {
+        std::ifstream inFile("players.json");
+        if (inFile) {
+            std::stringstream buffer;
+            buffer << inFile.rdbuf();
+            std::string content = buffer.str();
+            json players = json::parse(content, nullptr, false);
+            if (!players.is_discarded()) {
+                for (auto& [username, info] : players.items()) {
+                    if (info.is_object()) {
+                        int score = info.value("score", 0);
+                        scoreList.emplace_back(username, score);
+                    }
+                }
+            }
+        }
+
+        std::sort(scoreList.begin(), scoreList.end(), [](const auto& a, const auto& b) {
+            return a.second > b.second;
+        });
+    }
+
+    bool isInTop = false;
+    int topN = 5;
+    for (int i = 0; i < std::min(topN, static_cast<int>(scoreList.size())); ++i) {
+        if (scoreList[i].first == player.getUsername()) {
+            isInTop = true;
+            break;
+        }
+    }
 
     auto center = [](const string& text, int width) {
         int padding = (width - text.length()) / 2;
@@ -222,6 +258,9 @@ void drawAwardScreen(const Player& player, int finalScore, int bestScoreBeforeUp
     }
 
     cout << "+" << string(boxWidth, '-') << "+\n";
+    if (isInTop && finalScore > bestScoreBeforeUpdate) {
+        cout << "|" << center("🎉 NEW TOP 5! Welcome to the leaderboard!", boxWidth) << " |\n";
+    }
     cout << "|" << center("LEADERBOARD", boxWidth) << "|\n";
 
     ostringstream buffer;
