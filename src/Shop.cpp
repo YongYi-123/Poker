@@ -68,7 +68,7 @@ void Shop::showItems() {
         string nameLine = "[ " + to_string(i) + " ] \033[1m" + name + "\033[0m " + priceTag;
 
         cout << boxTop << "\n";
-        cout << "│ " << left << setw(boxWidth - 3) << nameLine << "│" << endl;
+        cout << "│ " << left << setw(boxWidth - 3) << nameLine << "                   │" << endl;
 
         const int maxLineLen = boxWidth - 4;
         for (size_t j = 0; j < desc.length(); j += maxLineLen) {
