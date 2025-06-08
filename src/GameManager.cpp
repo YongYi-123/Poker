@@ -422,8 +422,7 @@ void GameManager::awardStage() {
     drawAwardScreen(*currentPlayer, finalScore, bestScore);
 
     currentPlayer->addMoney(finalScore / 10);
-    Leaderboard::updatePlayerScore(currentPlayer->getUsername(), finalScore);
-
+    
     cout << "\nPress Enter to return to main menu...";
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
