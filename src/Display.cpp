@@ -259,7 +259,7 @@ void drawAwardScreen(const Player& player, int finalScore, int bestScoreBeforeUp
 
     cout << "+" << string(boxWidth, '-') << "+\n";
     if (isInTop && finalScore > bestScoreBeforeUpdate) {
-        cout << "|" << center("🎉 NEW TOP 5! Welcome to the leaderboard!", boxWidth) << " |\n";
+        cout << "|" << center("🎉 NEW TOP 5! Welcome to the leaderboard!", boxWidth) << "  |\n";
     }
     cout << "|" << center("LEADERBOARD", boxWidth) << "|\n";
 
