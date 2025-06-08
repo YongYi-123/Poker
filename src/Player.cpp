@@ -1,11 +1,13 @@
 #include "Player.h"
+#include "Item.h"
 #include "json.hpp"
 #include <fstream>
 #include <iostream>
 #include <algorithm>
 #include <sstream>
 #include <random>
-#include <cstdlib> 
+#include <cstdlib>
+#include <map>
 
 using json = nlohmann::json;
 const std::string FILE_NAME = "players.json";
@@ -19,7 +21,7 @@ std::string Player::getUsername() const { return username; }
 int Player::getScore() const { return score; }
 int Player::getMoney() const { return money; }
 Hand& Player::getHand() { return hand; }
-const std::vector<std::string>& Player::getInventory() const { return inventory; }
+const std::vector<std::unique_ptr<Item>>& Player::getInventory() const { return inventory; }
 const std::map<std::string, int>& Player::getStats() const { return handStats; }
 int Player::getNextScoreMultiplier() const { return nextScoreMultiplier; }
 void Player::setNextScoreMultiplier(int m) { nextScoreMultiplier = m; }
@@ -33,12 +35,14 @@ void Player::resetStats() {
 void Player::addScore(int amount) { score += amount; }
 void Player::addMoney(int amount) { money += amount; }
 void Player::updateStats(const std::string& handType) { handStats[handType]++; }
-void Player::addToInventory(const std::string& item) { inventory.push_back(item); }
+
+void Player::addToInventory(std::unique_ptr<Item> item) {
+    inventory.push_back(std::move(item));
+}
 
 std::string Player::getItemNameByIndex(int index) const {
     std::map<std::string, int> countMap;
-    for (const auto& item : inventory) countMap[item]++;
-
+    for (const auto& item : inventory) countMap[item->getName()]++;
     int i = 0;
     for (const auto& pair : countMap) {
         if (i == index) return pair.first;
@@ -47,36 +51,27 @@ std::string Player::getItemNameByIndex(int index) const {
     return "";
 }
 
-void Player::useItem(const std::string& item) {
-    auto it = std::find(inventory.begin(), inventory.end(), item);
-    if (it != inventory.end()) inventory.erase(it);
-}
+void Player::useItemByIndex(int index) {
+    std::string name = getItemNameByIndex(index);
 
-void Player::useItemEffect(const std::string& itemName) {
-    if (itemName == "Score Double Ticket") {
-        setNextScoreMultiplier(2);
-        std::cout << "Next score will be doubled!\n";
-    } else if (itemName == "Copy Ticket") {
-        copyRandomCardInHand();
-        std::cout << "A card has been copied!\n";
-    } else if (itemName == "Spade Ticket") {
-        changeCardSuits(Spades, 3);
-        std::cout << "3 cards changed to Spades!\n";
-    } else if (itemName == "Heart Ticket") {
-        changeCardSuits(Hearts, 3);
-        std::cout << "3 cards changed to Hearts!\n";
-    } else if (itemName == "Diamond Ticket") {
-        changeCardSuits(Diamonds, 3);
-        std::cout << "3 cards changed to Diamonds!\n";
-    } else if (itemName == "Club Ticket") {
-        changeCardSuits(Clubs, 3);
-        std::cout << "3 cards changed to Clubs!\n";
-    } else {
-        std::cout << "Unknown item: " << itemName << "\n";
+    if (name.empty()) {
+        std::cout << "Invalid item index.\n";
         return;
     }
-    useItem(itemName);
+
+    // Find the first item with the matching name
+    for (size_t i = 0; i < inventory.size(); ++i) {
+        if (inventory[i]->getName() == name) {
+            std::cout << "Using: " << name << "\n";
+            inventory[i]->apply(*this);
+            inventory.erase(inventory.begin() + i);
+            return;
+        }
+    }
+
+    std::cout << "Item not found.\n";
 }
+
 
 void Player::updateCombo(int currentMultiplier) {
     if (currentMultiplier == lastMultiplier && currentMultiplier > 1) {
@@ -140,8 +135,18 @@ bool Player::load() {
         json& p = data[username];
         score = p.value("score", 0);
         money = p.value("money", 0);
-        inventory = p.value("inventory", std::vector<std::string>{});
         handStats = p.value("handStats", std::map<std::string, int>{});
+        
+        inventory.clear();
+        if (p.contains("inventory") && p["inventory"].is_array()) {
+            for (const auto& itemName : p["inventory"]) {
+                if (itemName.is_string()) {
+                    auto item = Item::fromName(itemName.get<std::string>());
+                    if (item) inventory.push_back(std::move(item));
+                }
+            }
+        }
+
         return true;
     }
 
@@ -166,9 +171,14 @@ void Player::save() {
         }
     }
 
+    std::vector<std::string> itemNames;
+    for (const auto& item : inventory) {
+        itemNames.push_back(item->getName());
+    }
+
     data[username]["score"] = score;
     data[username]["money"] = money;
-    data[username]["inventory"] = inventory;
+    data[username]["inventory"] = itemNames;
     data[username]["handStats"] = handStats;
 
     std::ofstream outFile(FILE_NAME);
@@ -186,8 +196,9 @@ void Player::displayInventory() const {
         std::cout << "  (empty)\n";
         return;
     }
+
     std::map<std::string, int> countMap;
-    for (const auto& item : inventory) countMap[item]++;
+    for (const auto& item : inventory) countMap[item->getName()]++;
     int idx = 0;
     for (const auto& pair : countMap) {
         std::cout << "[" << idx++ << "] " << pair.first << " × " << pair.second << "\n";
