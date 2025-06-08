@@ -82,7 +82,7 @@ void drawResultInterface(const Player& player,
                          const string& handType,
                          int handScore,
                          int baseMultiplier,
-                         int itemMultiplier,
+                         int effectiveMultiplier,  // item * combo
                          const vector<int>& contributingValues) {
     cout << "\033[H\033[J";
     printGameHeader();
@@ -91,28 +91,36 @@ void drawResultInterface(const Player& player,
     if (!handType.empty()) {
         cout << "THIS HAND: " << handType << "\n";
 
+        // 1. Base score breakdown
         ostringstream breakdown;
         for (size_t i = 0; i < contributingValues.size(); ++i) {
             breakdown << contributingValues[i];
             if (i + 1 != contributingValues.size()) breakdown << " + ";
         }
 
-        cout << "SCORE CALC: (" << breakdown.str() << ") * "
-             << baseMultiplier << " (hand type)";
-        if (itemMultiplier > 1)
-            cout << " * " << itemMultiplier << " (item)";
+        // 2. Display formula with clear multipliers
+        cout << "SCORE CALC: (" << breakdown.str() << ")";
+
+        if (baseMultiplier > 1)
+            cout << " * " << baseMultiplier << " (hand type)";
+        if (player.getNextScoreMultiplier() > 1)
+            cout << " * " << player.getNextScoreMultiplier() << " (item)";
+        if (player.getComboMultiplier() > 1 && baseMultiplier > 1)
+            cout << " * " << player.getComboMultiplier() << " (combo)";
         cout << " = " << handScore << "\n";
 
+        // 3. Display combo streak message if applicable
         if (player.getComboMultiplier() > 1 && baseMultiplier > 1) {
             int bonusPercent = (player.getComboMultiplier() - 1) * 100;
-            cout << "\033[1;31m🔥 COMBO STREAK! x" 
-                 << player.getComboMultiplier() 
-                << " → Score +" << bonusPercent << "%!\033[0m\n";
+            cout << "\033[1;31m🔥 COMBO STREAK! x"
+                 << player.getComboMultiplier()
+                 << " → Score +" << bonusPercent << "%!\033[0m\n";
         }
 
         cout << "\n";
     }
 
+    // Card display
     cout << "╔════════════════════════════════════════════════════════════════════╗\n";
     cout << "║ Played Cards:                                                      ║\n";
     Hand ph;
@@ -170,6 +178,7 @@ void drawResultInterface(const Player& player,
 
     cout << "╚════════════════════════════════════════════════════════════════════╝\n";
 }
+
 void drawAwardScreen(const Player& player, int finalScore, int bestScoreBeforeUpdate) {
     const int boxWidth = 72;
 

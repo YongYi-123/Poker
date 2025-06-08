@@ -281,7 +281,7 @@ void GameManager::playRound() {
 
     // 評分
     ScoreResult result = Scorer::evaluate(selected);
-    int baseScore = result.score;             // 包含 baseMultiplier 的加總結果
+    int baseScore = result.score;
     int baseMultiplier = result.multiplier;
     int itemMultiplier = currentPlayer->getNextScoreMultiplier();
 
@@ -294,8 +294,11 @@ void GameManager::playRound() {
         currentPlayer->resetCombo();  // High Card
     }
 
-    // 最終得分 = 基礎加總 * item * combo
-    int finalScore = baseScore * itemMultiplier * comboMultiplier;
+    // 正確計分：baseScore * baseMultiplier * item * (可選的combo)
+    int finalScore = baseScore * baseMultiplier * itemMultiplier;
+    if (baseMultiplier > 1) {
+        finalScore *= comboMultiplier;
+    }
 
     currentPlayer->addScore(finalScore);
     currentPlayer->updateStats(result.handType);
@@ -317,6 +320,7 @@ void GameManager::playRound() {
 
     currentPlayer->setNextScoreMultiplier(1);
 }
+
 
 
 void GameManager::discardRound() {

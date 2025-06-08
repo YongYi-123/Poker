@@ -13,7 +13,7 @@ ScoreResult Scorer::evaluate(const vector<Card>& playedCards) {
     map<char, int> faceCount;
     map<Suit, int> suitCount;
     vector<char> faces;
-    vector<int> values; // from card.getValue()
+    vector<int> values;
     vector<int> used;
 
     for (const auto& card : playedCards) {
@@ -119,7 +119,7 @@ ScoreResult Scorer::evaluate(const vector<Card>& playedCards) {
         }
     }
 
-    // 不乘 multiplier，讓 GameManager 控制倍數計算
+    // ✅ baseScore = sum of contributing values (no multiplier applied here)
     int score = 0;
     for (int v : used) score += v;
 
@@ -143,5 +143,5 @@ int Scorer::getMultiplier(const string& handType) {
     if (it != multipliers.end()) {
         return it->second;
     }
-    return 1; // Default multiplier
+    return 1;
 }

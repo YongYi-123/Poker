@@ -1,16 +1,11 @@
-// Player.cpp
 #include "Player.h"
 #include "json.hpp"
 #include <fstream>
 #include <iostream>
 #include <algorithm>
 #include <sstream>
-<<<<<<< HEAD
-#include <cstdlib>
-=======
 #include <random>
 #include <cstdlib> 
->>>>>>> 9b76f78b62f9e988d317c9cc508ca267f476ac89
 
 using json = nlohmann::json;
 const std::string FILE_NAME = "players.json";
@@ -92,7 +87,6 @@ void Player::updateCombo(int currentMultiplier) {
     }
 }
 
-
 int Player::getComboMultiplier() const {
     return 1 << (comboCount - 1);  // 2^(comboCount - 1)
 }
@@ -106,19 +100,16 @@ void Player::changeCardSuits(Suit newSuit, int count) {
     std::vector<Card> cards = hand.getCards();
     std::vector<int> notTargetSuitIndices;
 
-    // Collect indices of cards that are not already the desired suit
     for (size_t i = 0; i < cards.size(); ++i) {
         if (cards[i].getSuit() != newSuit) {
             notTargetSuitIndices.push_back(i);
         }
     }
 
-    // Shuffle the indices randomly
     std::random_device rd;
     std::mt19937 gen(rd());
     std::shuffle(notTargetSuitIndices.begin(), notTargetSuitIndices.end(), gen);
 
-    // Change up to `count` of them
     for (int i = 0; i < std::min(count, static_cast<int>(notTargetSuitIndices.size())); ++i) {
         int idx = notTargetSuitIndices[i];
         cards[idx] = Card(newSuit, cards[idx].getFace());
@@ -126,7 +117,6 @@ void Player::changeCardSuits(Suit newSuit, int count) {
 
     hand.setCards(cards);
 }
-
 
 // Persistence
 bool Player::load() {
@@ -262,15 +252,4 @@ void Player::copyRandomCardInHand() {
         Card copy = cards[randIndex];
         hand.addCards({copy});
     }
-}
-
-void Player::changeCardSuits(Suit newSuit, int count) {
-    std::vector<Card> cards = hand.getCards();
-    int changed = 0;
-    for (auto& card : cards) {
-        if (changed >= count) break;
-        card = Card(newSuit, card.getFace());
-        ++changed;
-    }
-    hand.setCards(cards);
 }
