@@ -71,7 +71,7 @@ void Shop::showItems() {
 
         cout << boxTop << "\n";
 
-        // ✅ 對齊不破框（使用 setw 和 left）
+        // 對齊不破框（使用 setw 和 left）
         cout << "│ " << left << setw(boxWidth - 3) << nameLine << "                   │" << endl;
 
         const int maxLineLen = boxWidth - 4;

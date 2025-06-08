@@ -4,7 +4,8 @@
 #include <iostream>
 #include <algorithm>
 #include <sstream>
-#include <cstdlib>  // for rand()
+#include <random>
+#include <cstdlib> 
 
 using json = nlohmann::json;
 const std::string FILE_NAME = "players.json";
@@ -129,14 +130,29 @@ void Player::copyRandomCardInHand() {
 
 void Player::changeCardSuits(Suit newSuit, int count) {
     std::vector<Card> cards = hand.getCards();
-    int changed = 0;
-    for (auto& card : cards) {
-        if (changed >= count) break;
-        card = Card(newSuit, card.getFace());
-        ++changed;
+    std::vector<int> notTargetSuitIndices;
+
+    // Collect indices of cards that are not already the desired suit
+    for (size_t i = 0; i < cards.size(); ++i) {
+        if (cards[i].getSuit() != newSuit) {
+            notTargetSuitIndices.push_back(i);
+        }
     }
+
+    // Shuffle the indices randomly
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(notTargetSuitIndices.begin(), notTargetSuitIndices.end(), gen);
+
+    // Change up to `count` of them
+    for (int i = 0; i < std::min(count, static_cast<int>(notTargetSuitIndices.size())); ++i) {
+        int idx = notTargetSuitIndices[i];
+        cards[idx] = Card(newSuit, cards[idx].getFace());
+    }
+
     hand.setCards(cards);
 }
+
 
 // Persistence
 bool Player::load() {

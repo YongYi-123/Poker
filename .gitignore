@@ -7,3 +7,6 @@ poker.exe
 # Object directory
 obj/
 
+# Makefile(maybe computer issue?)
+Makefile
+
