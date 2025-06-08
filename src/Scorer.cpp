@@ -119,9 +119,9 @@ ScoreResult Scorer::evaluate(const vector<Card>& playedCards) {
         }
     }
 
+    // 不乘 multiplier，讓 GameManager 控制倍數計算
     int score = 0;
     for (int v : used) score += v;
-    score *= multiplier;
 
     return {handType, score, multiplier, used};
 }

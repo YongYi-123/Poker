@@ -16,12 +16,15 @@ private:
     std::map<std::string, int> handStats;
     std::vector<std::string> inventory;
 
+    // Combo Mode
+    int lastMultiplier = 0;   
+    int comboCount = 0;
+
 public:
     Player(const std::string& name);
 
     // Accessors
     std::string getUsername() const;
-    void resetStats();
     int getScore() const;
     int getMoney() const;
     Hand& getHand();
@@ -42,6 +45,13 @@ public:
     void changeCardSuits(Suit suit, int count);
     void useItemEffect(const std::string& itemName);
 
+    // Combo logic
+    void resetCombo();
+    void updateCombo(int currentMultiplier);
+    int getComboMultiplier() const;
+
+    void resetStats();
+
     // Persistence
     bool load();
     void save();
@@ -60,7 +70,6 @@ public:
     void discardCards(const std::vector<int>& indices);
     void addCardsToHand(const std::vector<Card>& cards);
     void showStats() const;
-    
 };
 
 #endif

@@ -101,7 +101,16 @@ void drawResultInterface(const Player& player,
              << baseMultiplier << " (hand type)";
         if (itemMultiplier > 1)
             cout << " * " << itemMultiplier << " (item)";
-        cout << " = " << handScore << "\n\n";
+        cout << " = " << handScore << "\n";
+
+        if (player.getComboMultiplier() > 1 && baseMultiplier > 1) {
+            int bonusPercent = (player.getComboMultiplier() - 1) * 100;
+            cout << "\033[1;31m🔥 COMBO STREAK! x" 
+                 << player.getComboMultiplier() 
+                << " → Score +" << bonusPercent << "%!\033[0m\n";
+        }
+
+        cout << "\n";
     }
 
     cout << "╔════════════════════════════════════════════════════════════════════╗\n";

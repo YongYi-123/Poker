@@ -3,6 +3,7 @@
 #include "Scorer.h"
 #include "Shop.h"
 #include "Display.h"
+#include "Player.h"
 #include <iostream>
 #include <limits>
 #include <sstream>
@@ -188,9 +189,9 @@ void GameManager::playRound() {
 
         cout << "╔══════════════ 🎮 Play Round 🎮 ══════════════╗\n";
         cout << "║   🟡 Rounds Left   : " << setw(2) << playRoundsLeft 
-            << "                        ║\n";
+             << "                      ║\n";
         cout << "║   🔴 Discards Left : " << setw(2) << discardRoundsLeft 
-            << "                        ║\n";
+             << "                      ║\n";
         cout << "╚══════════════════════════════════════════════╝\n\n";
 
         cout << "🃏 \033[1;36mAvailable Actions\033[0m:\n";
@@ -277,17 +278,26 @@ void GameManager::playRound() {
             }
         }
     }
-    
+
+    // 評分
     ScoreResult result = Scorer::evaluate(selected);
-    int score = result.score;
+    int baseScore = result.score;             // 包含 baseMultiplier 的加總結果
     int baseMultiplier = result.multiplier;
     int itemMultiplier = currentPlayer->getNextScoreMultiplier();
 
-    if (itemMultiplier > 1) {
-        score *= itemMultiplier;
+    // Combo logic
+    int comboMultiplier = 1;
+    if (baseMultiplier > 1) {
+        currentPlayer->updateCombo(baseMultiplier);
+        comboMultiplier = currentPlayer->getComboMultiplier();
+    } else {
+        currentPlayer->resetCombo();  // High Card
     }
 
-    currentPlayer->addScore(score);
+    // 最終得分 = 基礎加總 * item * combo
+    int finalScore = baseScore * itemMultiplier * comboMultiplier;
+
+    currentPlayer->addScore(finalScore);
     currentPlayer->updateStats(result.handType);
     playRoundsLeft--;
 
@@ -299,14 +309,15 @@ void GameManager::playRound() {
         playRoundsLeft,
         discardRoundsLeft,
         result.handType,
-        score,
+        finalScore,
         baseMultiplier,
-        itemMultiplier,
-        result.contributingValues 
+        itemMultiplier * comboMultiplier,  // 顯示用
+        result.contributingValues
     );
 
     currentPlayer->setNextScoreMultiplier(1);
 }
+
 
 void GameManager::discardRound() {
     vector<int> indices;
