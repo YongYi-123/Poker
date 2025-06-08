@@ -449,8 +449,29 @@ void GameManager::awardStage() {
         this_thread::sleep_for(chrono::seconds(2));
     }
 
+    // 顯示結果畫面
     drawAwardScreen(*currentPlayer, finalScore, bestScore);
     currentPlayer->addMoney(finalScore / 10);
+
+    // 額外統計顯示
+    cout << "\n📊 \033[1;33mGame Statistics\033[0m\n";
+    cout << "═══════════════════════════════════════════\n";
+
+    cout << "🃏 Total Cards Played   : " << currentPlayer->getTotalCardsPlayed() << "\n";
+    cout << "🗑️  Total Cards Discarded: " << currentPlayer->getTotalDiscards() << "\n";
+
+    const auto& stats = currentPlayer->getStats();
+    if (stats.empty()) {
+        cout << "📉 Hand Types           : (no valid hands played)\n";
+    } else {
+        cout << "📈 Hand Types:\n";
+        for (const auto& [type, count] : stats) {
+            cout << "   ➤ " << type << " × " << count << "\n";
+        }
+    }
+
+    cout << "═══════════════════════════════════════════\n";
     cout << "\nPress Enter to return to main menu...";
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
+

@@ -22,6 +22,10 @@ private:
     int lastMultiplier = 0;
     int comboCount = 0;
 
+    // Stats
+    int totalCardsPlayed = 0;
+    int totalDiscards = 0;
+
 public:
     Player(const std::string& name);
 
@@ -70,6 +74,8 @@ public:
     void discardCards(const std::vector<int>& indices);
     void addCardsToHand(const std::vector<Card>& cards);
     void showStats() const;
+    int getTotalCardsPlayed() const;
+    int getTotalDiscards() const;
 };
 
 #endif

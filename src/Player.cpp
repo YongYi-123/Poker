@@ -13,7 +13,7 @@ using json = nlohmann::json;
 const std::string FILE_NAME = "players.json";
 
 Player::Player(const std::string& name)
-    : username(name), score(0), money(0), nextScoreMultiplier(1) {
+    : username(name), score(0), money(0), nextScoreMultiplier(1), totalCardsPlayed(0), totalDiscards(0) {
     load();
 }
 
@@ -27,9 +27,12 @@ int Player::getNextScoreMultiplier() const { return nextScoreMultiplier; }
 void Player::setNextScoreMultiplier(int m) { nextScoreMultiplier = m; }
 void Player::setScore(int s) { score = s; }
 
+
 void Player::resetStats() {
     handStats.clear();
     resetCombo();
+    totalCardsPlayed = 0;
+    totalDiscards = 0;
 }
 
 void Player::addScore(int amount) { score += amount; }
@@ -59,7 +62,6 @@ void Player::useItemByIndex(int index) {
         return;
     }
 
-    // Find the first item with the matching name
     for (size_t i = 0; i < inventory.size(); ++i) {
         if (inventory[i]->getName() == name) {
             std::cout << "Using: " << name << "\n";
@@ -72,7 +74,6 @@ void Player::useItemByIndex(int index) {
     std::cout << "Item not found.\n";
 }
 
-
 void Player::updateCombo(int currentMultiplier) {
     if (currentMultiplier == lastMultiplier && currentMultiplier > 1) {
         comboCount++;
@@ -83,7 +84,7 @@ void Player::updateCombo(int currentMultiplier) {
 }
 
 int Player::getComboMultiplier() const {
-    return 1 << (comboCount - 1);  // 2^(comboCount - 1)
+    return 1 << (comboCount - 1);
 }
 
 void Player::resetCombo() {
@@ -113,7 +114,6 @@ void Player::changeCardSuits(Suit newSuit, int count) {
     hand.setCards(cards);
 }
 
-// Persistence
 bool Player::load() {
     std::ifstream inFile(FILE_NAME);
     if (!inFile.is_open()) return false;
@@ -136,7 +136,9 @@ bool Player::load() {
         score = p.value("score", 0);
         money = p.value("money", 0);
         handStats = p.value("handStats", std::map<std::string, int>{});
-        
+        totalCardsPlayed = p.value("totalCardsPlayed", 0);
+        totalDiscards = p.value("totalDiscards", 0);
+
         inventory.clear();
         if (p.contains("inventory") && p["inventory"].is_array()) {
             for (const auto& itemName : p["inventory"]) {
@@ -180,6 +182,8 @@ void Player::save() {
     data[username]["money"] = money;
     data[username]["inventory"] = itemNames;
     data[username]["handStats"] = handStats;
+    data[username]["totalCardsPlayed"] = totalCardsPlayed;
+    data[username]["totalDiscards"] = totalDiscards;
 
     std::ofstream outFile(FILE_NAME);
     if (!outFile) {
@@ -232,6 +236,7 @@ std::vector<int> Player::chooseCardsToPlay() const {
 }
 
 std::vector<Card> Player::playCards(const std::vector<int>& indices) {
+    totalCardsPlayed += indices.size();
     return hand.removeCards(indices);
 }
 
@@ -247,6 +252,7 @@ std::vector<int> Player::chooseCardsToDiscard() const {
 }
 
 void Player::discardCards(const std::vector<int>& indices) {
+    totalDiscards += indices.size();
     hand.removeCards(indices);
 }
 
@@ -263,4 +269,11 @@ void Player::copyRandomCardInHand() {
         Card copy = cards[randIndex];
         hand.addCards({copy});
     }
+}
+int Player::getTotalCardsPlayed() const {
+    return totalCardsPlayed;
+}
+
+int Player::getTotalDiscards() const {
+    return totalDiscards;
 }

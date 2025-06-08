@@ -35,4 +35,4 @@ run: $(TARGET)
 	@sleep 1
 	@echo "Running the game..."
 	@sleep 1
-	@./$(TARGET).exe
+	@./$(TARGET)
