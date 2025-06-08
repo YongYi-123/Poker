@@ -81,18 +81,22 @@ void GameManager::logout() {
 void GameManager::mainMenu() {
     int choice;
     do {
-        cout << "\033[H\033[J";  // Clear screen (works on most terminals)
-        cout << "==============================\n";
-        cout << "   Simplified Balatro Poker   \n";
-        cout << "==============================\n";
-        cout << "Player: " << currentPlayer->getUsername() << "\n";
-        cout << "\n=== Main Menu ===\n";
-        cout << "1. Play Game\n";
-        cout << "2. View Leaderboard\n";
-        cout << "3. Shop\n";
-        cout << "4. Logout\n";
-        cout << "5. View Inventory\n";
-        cout << "Enter your choice: ";
+        cout << "\033[2J\033[H";  // clear screen
+
+cout << "╔══════════════════════════════════════════╗\n";
+cout << "║          Simplified Balatro Poker        ║\n";
+cout << "╚══════════════════════════════════════════╝\n\n";
+
+cout << "👤 Player: \033[1;34m" << currentPlayer->getUsername() << "\033[0m\n\n";
+
+cout << "╔════════════════Main Menu═════════════════╗ \n";
+cout << "║  1.  Play Game                           ║\n";
+cout << "║  2.  View Leaderboard                    ║\n";
+cout << "║  3.  Shop                                ║\n";
+cout << "║  4.  Logout                              ║\n";
+cout << "║  5.  View Inventory                      ║\n";
+cout << "╚══════════════════════════════════════════╝\n";
+cout << "Enter your choice: ";
         if (!(cin >> choice)) {
             cin.clear();  // clear error flags
             cin.ignore(numeric_limits<streamsize>::max(), '\n');  // discard bad input
@@ -111,6 +115,7 @@ void GameManager::mainMenu() {
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 break;
             case 3:
+                Shop::enterShopAnimation(); // 👈 新增動畫
                 Shop::purchase(*currentPlayer);
                 cout << "\nPress Enter to return to menu...";
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -181,12 +186,20 @@ void GameManager::playRound() {
             discardRoundsLeft
         );
 
-        cout << "\n--- Play Round (" << playRoundsLeft << " left) ---\n";
-        cout << "\nYou can:\n";
-        cout << "- Type card indices to play (e.g. `0 1 3`)\n";
-        cout << "- Type `sort suit` or `sort value`\n";
-        cout << "- Type `inventory` to view and use an item\n";
-        cout << "Enter command or card indices: ";
+        cout << "╔══════════════ 🎮 Play Round 🎮 ══════════════╗\n";
+        cout << "║   🟡 Rounds Left   : " << setw(2) << playRoundsLeft 
+            << "                        ║\n";
+        cout << "║   🔴 Discards Left : " << setw(2) << discardRoundsLeft 
+            << "                        ║\n";
+        cout << "╚══════════════════════════════════════════════╝\n\n";
+
+        cout << "🃏 \033[1;36mAvailable Actions\033[0m:\n";
+        cout << "  ➤ Enter card indices to play (e.g. \033[1;33m0 2 5\033[0m)\n";
+        cout << "  ➤ Type \033[1;33msort suit\033[0m   → Sort hand by suit\n";
+        cout << "  ➤ Type \033[1;33msort value\033[0m  → Sort hand by value\n";
+        cout << "  ➤ Type \033[1;32minventory\033[0m   → View or use item\n\n";
+
+        cout << "🔹 \033[1mEnter command or card indices:\033[0m ";
 
         string inputLine;
         getline(cin, inputLine);

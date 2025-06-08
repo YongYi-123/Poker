@@ -3,6 +3,7 @@
 #include <thread>
 #include <chrono>
 #include "Display.h"
+#include "GameManager.h"
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -50,7 +51,7 @@ void drawWelcomeScreen() {
     clearScreen();
 
     cout << "╔════════════════════════════════════╗\n";
-    cout << "║        Simplified Balatro Poker   ║\n";
+    cout << "║        Simplified Balatro Poker    ║\n";
     cout << "╚════════════════════════════════════╝\n\n";
 
     cout << "\033[1;37m♠ \033[31m♥ \033[31m♦ \033[1;37m♣   "

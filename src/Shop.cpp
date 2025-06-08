@@ -1,9 +1,13 @@
 #include "Shop.h"
+#include "Player.h"
 #include <iostream>
+#include <vector>
 #include <map>
 #include <limits>
 #include <algorithm>
-
+#include <thread>
+#include <chrono>
+#include <iomanip> // ✅ 為 setw() 和 left
 using namespace std;
 
 struct Item {
@@ -12,7 +16,26 @@ struct Item {
     int price;
 };
 
-// Define available shop items
+void Shop::enterShopAnimation() {
+    const string message = "Entering shopping mall...";
+
+    for (size_t i = 1; i <= message.size(); ++i) {
+        cout << "\033[2J\033[H";  // 清空畫面
+        cout << "\033[1m" << message.substr(0, i) << "\033[0m" << flush;
+        this_thread::sleep_for(chrono::milliseconds(80));
+    }
+
+    for (int i = 0; i < 2; ++i) {
+        this_thread::sleep_for(chrono::milliseconds(200));
+        cout << "\033[2J\033[H";
+        this_thread::sleep_for(chrono::milliseconds(200));
+        cout << "\033[1m" << message << "\033[0m" << flush;
+    }
+
+    this_thread::sleep_for(chrono::milliseconds(500));
+    cout << "\n\n";
+}
+
 const std::vector<Item> shopItems = {
     {"Score Double Ticket", "Doubles the score of the next played hand", 10},
     {"Spade Ticket", "Changes 3 random cards in hand to Spades", 5},
@@ -23,14 +46,45 @@ const std::vector<Item> shopItems = {
 };
 
 void Shop::showItems() {
-    std::cout << "\033[H\033[J";
-    std::cout << "==== Shop Menu ====\n";
-    for (size_t i = 0; i < shopItems.size(); ++i) {
-        std::cout << "[" << i << "] "
-                  << shopItems[i].name << " ($" << shopItems[i].price << ") - "
-                  << shopItems[i].description << "\n";
+    cout << "\033[2J\033[H";
+
+    const string title = "🛍️  SHOPPING MALL  🛍️";
+    const int boxWidth = 60;
+    const int screenWidth = 70;
+    int padding = (screenWidth - title.length()) / 2;
+    cout << string(padding, ' ') << "\033[1;36m" << title << "\033[0m\n\n";
+
+    string horizontal = "─";
+    string boxTop = "╭";
+    string boxBot = "╰";
+    for (int i = 0; i < boxWidth - 2; ++i) {
+        boxTop += horizontal;
+        boxBot += horizontal;
     }
-    std::cout << "[x] Exit Shop\n";
+    boxTop += "╮";
+    boxBot += "╯";
+
+    for (size_t i = 0; i < shopItems.size(); ++i) {
+        const Item& item = shopItems[i];
+        string priceTag = "(\033[1;32m$" + to_string(item.price) + "\033[0m)";
+        string nameLine = "[ " + to_string(i) + " ] \033[1m" + item.name + "\033[0m " + priceTag;
+
+        cout << boxTop << "\n";
+
+        // ✅ 對齊不破框（使用 setw 和 left）
+        cout << "│ " << left << setw(boxWidth - 3) << nameLine << "                   │" << endl;
+
+        const int maxLineLen = boxWidth - 4;
+        string desc = item.description;
+        for (size_t j = 0; j < desc.length(); j += maxLineLen) {
+            string line = desc.substr(j, maxLineLen);
+            cout << "│ " << left << setw(boxWidth - 3) << line << "│" << endl;
+        }
+
+        cout << boxBot << "\n\n";
+    }
+
+    cout << "[x] Exit Shop\n";
 }
 
 void Shop::purchase(Player& player) {
@@ -71,13 +125,13 @@ void Shop::purchase(Player& player) {
         for (const auto& [idx, qty] : cart) {
             int itemCost = shopItems[idx].price * qty;
             std::cout << "- " << shopItems[idx].name << " x" << qty
-                    << " = $" << itemCost << "\n";
+                      << " = $" << itemCost << "\n";
             currentTotal += itemCost;
         }
         std::cout << "Total so far: $" << currentTotal << "\n\n";
         std::cout << "\nPress Enter to continue...";
-        std::cin.ignore(); // consume leftover '\n' from previous input
-        std::cin.get();    // actually wait for Enter
+        std::cin.ignore();
+        std::cin.get();
     }
 
     if (cart.empty()) {
@@ -85,7 +139,6 @@ void Shop::purchase(Player& player) {
         return;
     }
 
-    // Checkout summary
     int totalCost = 0;
     std::cout << "\nCheckout Summary:\n";
     for (const auto& [index, qty] : cart) {

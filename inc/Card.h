@@ -20,4 +20,5 @@ public:
     std::string getSuitEmoji() const;
 };
 
+
 #endif

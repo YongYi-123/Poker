@@ -1,24 +1,50 @@
-#include "Display.h"
-#include "Hand.h"
-#include "Leaderboard.h"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include "Display.h"
+#include "Hand.h"
+#include "Player.h"
+#include "Card.h"
+#include "Leaderboard.h"
 
 using namespace std;
+
+void printGameHeader() {
+    cout << "\033[1;37m♠\033[0m    "
+         << "\033[31m♥\033[0m    "
+         << "\033[31m♦\033[0m    "
+         << "\033[1;37m♣\033[0m    "
+         << "\033[1;36mSimplified Balatro Poker\033[0m    "
+         << "\033[1;37m♣\033[0m    "
+         << "\033[31m♦\033[0m    "
+         << "\033[31m♥\033[0m    "
+         << "\033[1;37m♠\033[0m\n\n";
+}
+
+void printPlayerInfoBox(const Player& player, int playRoundsLeft, int discardRoundsLeft) {
+    string name = player.getUsername();
+    int score = player.getScore();
+
+    cout << "┌──────────────────────┐\n";
+    cout << "│ Player   : " << setw(10) << left << name << "│\n";
+    cout << "│ SCORE    : " << setw(10) << left << score << "│\n";
+    cout << "│ HANDS    : " << setw(10) << left << playRoundsLeft << "│\n";
+    cout << "│ DISCARDS : " << setw(10) << left << discardRoundsLeft << "│\n";
+    cout << "└──────────────────────┘\n\n";
+}
 
 void drawHandOnlyInterface(const Player& player,
                            const vector<Card>& handCards,
                            int playRoundsLeft,
                            int discardRoundsLeft) {
     cout << "\033[H\033[J";  // Clear screen
-
-    cout << right << setw(70) << "SCORE    : " << player.getScore() << "\n";
-    cout << right << setw(70) << "HANDS    : " << playRoundsLeft << "\n";
-    cout << right << setw(70) << "DISCARDS : " << discardRoundsLeft << "\n\n";
+    printGameHeader();
+    printPlayerInfoBox(player, playRoundsLeft, discardRoundsLeft);
 
     cout << "╔════════════════════════════════════════════════════════════════════╗\n";
-
     cout << "║   ";
     for (size_t i = 0; i < handCards.size(); ++i)
         cout << "  " << setw(2) << i << "    ";
@@ -26,7 +52,7 @@ void drawHandOnlyInterface(const Player& player,
 
     cout << "║   ";
     for (size_t i = 0; i < handCards.size(); ++i)
-        cout << "┌─────┐ ";
+        cout << "╭─────╮ ";
     cout << string((8 - handCards.size()) * 8, ' ') << " ║\n";
 
     cout << "║   ";
@@ -41,7 +67,7 @@ void drawHandOnlyInterface(const Player& player,
 
     cout << "║   ";
     for (size_t i = 0; i < handCards.size(); ++i)
-        cout << "└─────┘ ";
+        cout << "╰─────╯ ";
     cout << string((8 - handCards.size()) * 8, ' ') << " ║\n";
 
     cout << "╚════════════════════════════════════════════════════════════════════╝\n";
@@ -59,10 +85,8 @@ void drawResultInterface(const Player& player,
                          int itemMultiplier,
                          const vector<int>& contributingValues) {
     cout << "\033[H\033[J";
-
-    cout << right << setw(70) << "SCORE    : " << player.getScore() << "\n";
-    cout << right << setw(70) << "HANDS    : " << playRoundsLeft << "\n";
-    cout << right << setw(70) << "DISCARDS : " << discardRoundsLeft << "\n\n";
+    printGameHeader();
+    printPlayerInfoBox(player, playRoundsLeft, discardRoundsLeft);
 
     if (!handType.empty()) {
         cout << "THIS HAND: " << handType << "\n";
@@ -111,7 +135,7 @@ void drawResultInterface(const Player& player,
 
     cout << "║   ";
     for (int i = 0; i < 8; ++i)
-        cout << "┌─────┐ ";
+        cout << "╭─────╮ ";
     cout << " ║\n";
 
     cout << "║   ";
@@ -132,12 +156,11 @@ void drawResultInterface(const Player& player,
 
     cout << "║   ";
     for (int i = 0; i < 8; ++i)
-        cout << "└─────┘ ";
+        cout << "╰─────╯ ";
     cout << " ║\n";
 
     cout << "╚════════════════════════════════════════════════════════════════════╝\n";
 }
-
 void drawAwardScreen(const Player& player, int finalScore, int bestScoreBeforeUpdate) {
     const int boxWidth = 72;
 
@@ -147,6 +170,9 @@ void drawAwardScreen(const Player& player, int finalScore, int bestScoreBeforeUp
     };
 
     cout << "\033[H\033[J";
+    printGameHeader();
+    printPlayerInfoBox(player, 0, 0); // 不顯示剩餘手牌與棄牌（也可以不顯示）
+
     cout << "+" << string(boxWidth, '=') << "+\n";
     cout << "|" << center("** GAME OVER **", boxWidth) << "|\n";
     cout << "+" << string(boxWidth, '=') << "+\n";
@@ -168,8 +194,8 @@ void drawAwardScreen(const Player& player, int finalScore, int bestScoreBeforeUp
     }
 
     cout << "+" << string(boxWidth, '-') << "+\n";
-
     cout << "|" << center("HAND STATS", boxWidth) << "|\n";
+
     const auto& stats = player.getStats();
     for (const auto& [type, count] : stats) {
         ostringstream line;

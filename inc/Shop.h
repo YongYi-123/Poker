@@ -10,6 +10,7 @@ public:
 
     // Let the player purchase an item
     static void purchase(Player& player);
+    static void enterShopAnimation();
 };
 
 #endif
